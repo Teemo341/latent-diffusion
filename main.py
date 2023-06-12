@@ -558,6 +558,7 @@ if __name__ == "__main__":
         }
         default_logger_cfg = default_logger_cfgs["testtube"]
         if "logger" in lightning_config:
+            print('lightning logger exist, main line 561')
             logger_cfg = lightning_config.logger
         else:
             logger_cfg = OmegaConf.create()
