@@ -1,4 +1,12 @@
 #!/bin/bash
+#SBATCH -J download_first_stages
+#SBATCH -o ./result/download_first_stages.out               
+#SBATCH -p compute                  
+#SBATCH --qos=normal               
+#SBATCH -N 1               
+#SBATCH --ntasks-per-node=1                    
+#SBATCH --cpus-per-task=4
+
 wget -O models/first_stage_models/kl-f4/model.zip https://ommer-lab.com/files/latent-diffusion/kl-f4.zip
 wget -O models/first_stage_models/kl-f8/model.zip https://ommer-lab.com/files/latent-diffusion/kl-f8.zip
 wget -O models/first_stage_models/kl-f16/model.zip https://ommer-lab.com/files/latent-diffusion/kl-f16.zip
