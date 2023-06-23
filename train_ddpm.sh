@@ -1,11 +1,11 @@
 #! /bin/bash
 #SBATCH -J ddpm_lsun
-#SBATCH -o ./result/ddpm_lsun.out               
+#SBATCH -o ./results/ddpm_lsun.out               
 #SBATCH -p compute                  
 #SBATCH --qos=normal               
 #SBATCH -N 1               
 #SBATCH --ntasks-per-node=1                    
-#SBATCH --cpus-per-task=1
-#SBATCH --gres=gpu:3090:1
+#SBATCH --cpus-per-task=2
+#SBATCH --gres=gpu:P40:2
 
-python main.py --base configs/latent-diffusion/lsun_churches-ldm-kl-8.yaml -t --gpus 1
+python -u main.py --base configs/latent-diffusion/lsun_churches-ldm-kl-8.yaml -t --gpus 0,1
