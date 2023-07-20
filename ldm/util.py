@@ -342,7 +342,7 @@ def vca(Y,R,verbose = True,snr_input = 0):
 
   for i in range(R):
     w = np.random.rand(R,1);   
-    f = w - sp.dot(A,np.dot(splin.pinv(A),w))
+    f = w - np.dot(A,np.dot(splin.pinv(A),w))
     f = f / splin.norm(f)
       
     v = np.dot(f.T,y)
@@ -352,4 +352,23 @@ def vca(Y,R,verbose = True,snr_input = 0):
 
   Ae = Yp[:,indice]
 
-  return Ae,indice,
+  return Ae,indice,Yp
+
+
+
+def transfer_to_abundance(Y, Ae):
+    X_ = np.dot(np.linalg.inv(np.dot(Ae.T,Ae)),np.dot(Ae.T,Y))
+    return X_
+
+
+if __name__ == '__main__':
+    Y = np.random.uniform(size=(6,4))
+    R =3
+    Ae, indice, Yp = vca(Y,R,verbose = True,snr_input = 0)
+    print(Y)
+    print(Ae)
+    print(indice)
+    print(Yp)
+    x_ = np.dot(np.dot(np.linalg.inv(np.dot(Ae.T,Ae)),Ae.T),Y)
+    print(x_)
+    print(np.dot(Ae,x_))
