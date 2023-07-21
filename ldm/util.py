@@ -357,6 +357,9 @@ def vca(Y,R,verbose = True,snr_input = 0):
 
 
 def transfer_to_abundance(Y, Ae):
+    # Y = Ae*X
+    # Ae.T*Y = Ae.T*Ae*X
+    #(Ae.T*Ae)**-1*Ae.T*Y = X
     X_ = np.dot(np.linalg.inv(np.dot(Ae.T,Ae)),np.dot(Ae.T,Y))
     return X_
 

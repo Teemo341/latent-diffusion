@@ -5,6 +5,7 @@ from contextlib import contextmanager
 import sys
 import torch.linalg as splin
 import numpy as np
+from einops import rearrange, repeat
 
 from taming.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
 
@@ -169,6 +170,8 @@ class VCA(pl.LightningModule):
                  ckpt_path=None
                  ):
         super().__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
         self.end_members = torch.nn.Parameter(torch.randn(in_channels,out_channels))
         if ckpt_path is not None:
             self.init_from_ckpt(ckpt_path)
@@ -179,26 +182,37 @@ class VCA(pl.LightningModule):
         print(f"Restored from {path}")
 
     def encode(self, x):
-        h = self.encoder(x)
-        moments = self.quant_conv(h)
-        posterior = DiagonalGaussianDistribution(moments)
-        return posterior
+        # Y = Ae*X
+        # Ae.T*Y = Ae.T*Ae*X
+        #(Ae.T*Ae)**-1*Ae.T*Y = X
+        Y = rearrange(x,'b c h w -> c (b h w)')
+        X_ = torch.matmul(torch.linalg.inv(torch.matmul(self.end_members.T,self.end_members)),torch.matmul(self.end_members.T,Y))
+        z = rearrange(X_, 'c (b h w) -> b c h w')
+        return z
+
 
     def decode(self, z):
-        z = self.post_quant_conv(z)
-        dec = self.decoder(z)
+        X = rearrange(z,'b c h w -> c (b h w)')
+        Y = torch.matmul(self.end_members,X)
+        dec = rearrange(Y,'c (b h w) -> b c h w')
+        return dec
+    
+
+    def forward(self, input):
+        z = self.encode(input)
+        dec = self.decode(z)
         return dec
 
-    def forward(self, input, sample_posterior=True):
-        posterior = self.encode(input)
-        if sample_posterior:
-            z = posterior.sample()
-        else:
-            z = posterior.mode()
-        dec = self.decode(z)
-        return dec, posterior
 
-    def get_input(self, batch, k):
+    def update_endmembers(self, whole_image):
+        whole_image = rearrange(whole_image,'c h w -> c (h w)')
+        Ae,indice,Yp = vca(whole_image,self.out_channels)
+        assert Ae.shape == self.end_members.shape
+        self.end_members = Ae.clone()
+        self.end_members.requires_grad = True
+
+
+    def get_input(self, batch, k='image'):
         x = batch[k]
         if len(x.shape) == 3:
             x = x[..., None]
@@ -208,16 +222,15 @@ class VCA(pl.LightningModule):
     @torch.no_grad()
     def log_images(self, batch, only_inputs=False, **kwargs):
         log = dict()
-        x = self.get_input(batch, self.image_key)
+        x = self.get_input(batch)
         x = x.to(self.device)
         if not only_inputs:
-            xrec, posterior = self(x)
+            xrec = self(x)
             if x.shape[1] > 3:
                 # colorize with random projection
                 assert xrec.shape[1] > 3
                 x = self.to_rgb(x)
                 xrec = self.to_rgb(xrec)
-            log["samples"] = self.decode(torch.randn_like(posterior.sample()))
             log["reconstructions"] = xrec
         log["inputs"] = x
         return log

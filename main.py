@@ -286,7 +286,7 @@ class SetupCallback(Callback):
                     pass
 
 
-class ImageLogger(Callback):
+class ImageLogger(Callback):#TODO add HSI image logger
     def __init__(self, batch_frequency, max_images, clamp=True, increase_log_steps=True,
                  rescale=True, disabled=False, log_on_batch_idx=False, log_first_step=False,
                  log_images_kwargs=None):
