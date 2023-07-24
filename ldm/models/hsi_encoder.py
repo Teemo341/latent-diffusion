@@ -2,7 +2,7 @@ import torch
 import pytorch_lightning as pl
 import torch.nn.functional as F
 from contextlib import contextmanager
-import sys
+import sys,os
 import torch.linalg as splin
 import numpy as np
 from einops import rearrange, repeat
@@ -11,8 +11,10 @@ from taming.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
 
 from ldm.modules.diffusionmodules.model import Encoder, Decoder
 from ldm.modules.distributions.distributions import DiagonalGaussianDistribution
+import ldm.data.HSI as datasets_all
 
 from ldm.util import instantiate_from_config
+import argparse
 
 
 #############################################
@@ -71,6 +73,7 @@ def vca(Y,R,verbose = True,snr_input = 0):
   #############################################
   # Initializations
   #############################################
+  Y = torch.tensor(Y)
   if len(Y.shape)!=2:
     sys.exit('Input data must be of size L (number of bands i.e. channels) by N (number of pixels)')
 
@@ -185,16 +188,20 @@ class VCA(pl.LightningModule):
         # Y = Ae*X
         # Ae.T*Y = Ae.T*Ae*X
         #(Ae.T*Ae)**-1*Ae.T*Y = X
-        Y = rearrange(x,'b c h w -> c (b h w)')
+        b_,c_,h_,w_ = x.shape
+        Y = rearrange(x,'b c h w -> c (b h w)',b=b_,c=c_,h=h_,w=w_)
         X_ = torch.matmul(torch.linalg.inv(torch.matmul(self.end_members.T,self.end_members)),torch.matmul(self.end_members.T,Y))
-        z = rearrange(X_, 'c (b h w) -> b c h w')
+        c_ = self.out_channels
+        z = rearrange(X_, 'c (b h w) -> b c h w',b=b_,c=c_,h=h_,w=w_)
         return z
 
 
     def decode(self, z):
-        X = rearrange(z,'b c h w -> c (b h w)')
+        b_,c_,h_,w_ = z.shape
+        X = rearrange(z,'b c h w -> c (b h w)',b=b_,c=c_,h=h_,w=w_)
         Y = torch.matmul(self.end_members,X)
-        dec = rearrange(Y,'c (b h w) -> b c h w')
+        c_ = self.in_channels
+        dec = rearrange(Y,'c (b h w) -> b c h w',b=b_,c=c_,h=h_,w=w_)
         return dec
     
 
@@ -202,15 +209,7 @@ class VCA(pl.LightningModule):
         z = self.encode(input)
         dec = self.decode(z)
         return dec
-
-
-    def update_endmembers(self, whole_image):
-        whole_image = rearrange(whole_image,'c h w -> c (h w)')
-        Ae,indice,Yp = vca(whole_image,self.out_channels)
-        assert Ae.shape == self.end_members.shape
-        self.end_members = Ae.clone()
-        self.end_members.requires_grad = True
-
+    
 
     def get_input(self, batch, k='image'):
         x = batch[k]
@@ -244,6 +243,16 @@ class VCA(pl.LightningModule):
         return x
 
 
+def update_endmembers(VCA_module, whole_image):
+    # whole_image = rearrange(whole_image,'c h w -> c (h w)')
+    whole_image = rearrange(whole_image,'h w c -> c (h w)')
+    Ae,indice,Yp = vca(whole_image,VCA_module.out_channels)
+    # print(Ae.shape)
+    # print(VCA_module.end_members.shape)
+    assert Ae.shape == VCA_module.end_members.shape
+    VCA_module.end_members.data = Ae.clone()
+    VCA_module.end_members.requires_grad = True
+
 class IdentityFirstStage(torch.nn.Module):
     def __init__(self, *args, vq_interface=False, **kwargs):
         self.vq_interface = vq_interface  # TODO: Should be true by default but check to not break older stuff
@@ -264,13 +273,29 @@ class IdentityFirstStage(torch.nn.Module):
         return x
 
 if __name__ == '__main__':
-    Y = torch.rand(6,4)
-    R =4
-    Ae, indice, Yp = vca(Y,R,verbose = True,snr_input = 0)
-    print(Y)
-    print(Ae)
-    print(indice)
-    print(Yp)
-    x_ = torch.matmul(torch.matmul(torch.linalg.inv(torch.matmul(Ae.T,Ae)),Ae.T),Y)
-    print(x_)
-    print(torch.matmul(Ae,x_))
+    parser = argparse.ArgumentParser(description='Domain generalization')
+    parser.add_argument('--data', type=str,help='allpy vca on which HSI data',choices=['Indian_Pines_Corrected'])
+    parser.add_argument('--save_path',type = str,default="./models/first_stage_models/HSI/VCA/")
+    parser.add_argument('--feature_channels',type = int,default=20)
+    args = parser.parse_args()
+
+    if args.data == 'Indian_Pines_Corrected':
+       dataset = datasets_all.Indian_Pines_Corrected(size = 32)
+       print(dataset.__len__())
+       image = dataset.whole_image
+
+    # h,w,c = image.shape
+    # model = VCA(in_channels=c,out_channels=args.feature_channels)
+    # update_endmembers(model,image)
+
+    # if not os.path.exists(args.save_path):
+    #    os.makedirs(args.save_path)
+    # path = args.save_path+'model.ckpt' 
+    # stat = {}
+    # stat['state_dict']=model.state_dict()
+    # torch.save(stat,path)
+
+    # print('finished')
+
+    # model = VCA(in_channels=200,out_channels=20,ckpt_path='models/first_stage_models/HSI/VCA/model.ckpt')
+    # print('finished')

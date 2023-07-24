@@ -1251,7 +1251,7 @@ class LatentDiffusion(DDPM):
 
     @torch.no_grad()
     def log_images(self, batch, N=8, n_row=4, sample=True, ddim_steps=200, ddim_eta=1., return_keys=None,
-                   quantize_denoised=True, inpaint=True, plot_denoise_rows=False, plot_progressive_rows=True,
+                   quantize_denoised=True, inpaint=True, plot_denoise_rows=True, plot_progressive_rows=True,
                    plot_diffusion_rows=True, **kwargs):
 
         use_ddim = ddim_steps is not None
@@ -1294,9 +1294,12 @@ class LatentDiffusion(DDPM):
                     diffusion_row.append(self.decode_first_stage(z_noisy))
 
             diffusion_row = torch.stack(diffusion_row)  # n_log_step, n_row, C, H, W
+            # print('diffusion_row',diffusion_row.shape)
             diffusion_grid = rearrange(diffusion_row, 'n b c h w -> b n c h w')
             diffusion_grid = rearrange(diffusion_grid, 'b n c h w -> (b n) c h w')
-            diffusion_grid = make_grid(diffusion_grid, nrow=diffusion_row.shape[0])
+            # print('diffusion_grid',diffusion_grid.shape)
+            diffusion_grid = make_grid(diffusion_grid, nrow=diffusion_row.shape[0]) #? why change to grid and furter change to grid
+            # print('diffusion_grid',diffusion_grid.shape)
             log["diffusion_row"] = diffusion_grid
 
         if sample:
