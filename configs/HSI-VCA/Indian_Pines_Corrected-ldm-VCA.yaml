@@ -71,6 +71,10 @@ lightning:
         visual_channels: [69, 27, 11]
         log_images_kwargs:
           quantize_denoised: False
+          inpaint : True
+          plot_denoise_rows : False
+          plot_progressive_rows : True
+          plot_diffusion_rows : True
 
 
   trainer:

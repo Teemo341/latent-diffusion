@@ -284,18 +284,18 @@ if __name__ == '__main__':
        print(dataset.__len__())
        image = dataset.whole_image
 
-    # h,w,c = image.shape
-    # model = VCA(in_channels=c,out_channels=args.feature_channels)
-    # update_endmembers(model,image)
+    h,w,c = image.shape
+    model = VCA(in_channels=c,out_channels=args.feature_channels)
+    update_endmembers(model,image)
 
-    # if not os.path.exists(args.save_path):
-    #    os.makedirs(args.save_path)
-    # path = args.save_path+'model.ckpt' 
-    # stat = {}
-    # stat['state_dict']=model.state_dict()
-    # torch.save(stat,path)
+    if not os.path.exists(args.save_path+args.data):
+       os.makedirs(args.save_path+args.data)
+    path = args.save_path+args.data+'/model.ckpt' 
+    stat = {}
+    stat['state_dict']=model.state_dict()
+    torch.save(stat,path)
 
-    # print('finished')
+    print('finished')
 
     # model = VCA(in_channels=200,out_channels=20,ckpt_path='models/first_stage_models/HSI/VCA/model.ckpt')
     # print('finished')
