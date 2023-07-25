@@ -11,11 +11,11 @@ model:
     first_stage_key: "image"
     cond_stage_key: "image"
     image_size: 32
-    channels: 20
+    channels: 40
     cond_stage_trainable: False
     concat_mode: False
     scale_by_std: True
-    monitor: 'val/loss_simple_ema'
+    monitor: 'train/loss_simple'
 
     scheduler_config: # 10000 warmup steps
       target: ldm.lr_scheduler.LambdaLinearScheduler
@@ -30,8 +30,8 @@ model:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
         image_size: 32
-        in_channels: 20
-        out_channels: 20
+        in_channels: 40
+        out_channels: 40
         model_channels: 192
         attention_resolutions: [ 1, 2, 4, 8 ]   # 32, 16, 8, 4
         num_res_blocks: 2
@@ -44,8 +44,8 @@ model:
       target: ldm.models.hsi_encoder.VCA
       params:
         in_channels: 200
-        out_channels: 20
-        ckpt_path: "models/first_stage_models/HSI/VCA/model.ckpt"
+        out_channels: 40
+        ckpt_path: "models/first_stage_models/HSI/VCA/Indian_Pines_Corrected/model.ckpt"
 
     cond_stage_config: "__is_unconditional__"
 
@@ -65,13 +65,13 @@ lightning:
     image_logger:
       target: main_HSI.ImageLogger_HSI
       params:
-        batch_frequency: 400
+        batch_frequency: 1000
         max_images: 8
         increase_log_steps: False
-        visual_channels: [69, 27, 11]
+        visual_channels: [-69, -27, -11]
         log_images_kwargs:
           quantize_denoised: False
-          inpaint : True
+          inpaint : False
           plot_denoise_rows : False
           plot_progressive_rows : True
           plot_diffusion_rows : True

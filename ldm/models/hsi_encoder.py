@@ -15,6 +15,7 @@ import ldm.data.HSI as datasets_all
 
 from ldm.util import instantiate_from_config
 import argparse
+from PIL import Image
 
 
 #############################################
@@ -280,9 +281,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.data == 'Indian_Pines_Corrected':
-       dataset = datasets_all.Indian_Pines_Corrected(size = 32)
-       print(dataset.__len__())
-       image = dataset.whole_image
+       dataset = datasets_all.Indian_Pines_Corrected()
+       image = dataset.__getitem__(0)['image']#hwc
 
     h,w,c = image.shape
     model = VCA(in_channels=c,out_channels=args.feature_channels)
@@ -294,6 +294,27 @@ if __name__ == '__main__':
     stat = {}
     stat['state_dict']=model.state_dict()
     torch.save(stat,path)
+
+    # show inputs and reconstructions
+    b = (image+1.0)/2*225
+    b = b[:,:,[-69, -27, -11]].astype(np.uint8)
+    print(b.shape)
+    b = Image.fromarray(b)
+    b.save(args.save_path+args.data+"/original_image.png")
+
+    b = image
+    b = torch.tensor(b)
+    b = b[None,...]# bhwc
+    print(b.shape)
+    b = rearrange(b,'b h w c -> b c h w')
+    b = model(b)
+    b = rearrange(b, 'b c h w -> b h w c')
+    b = b[0,:,:,:]
+    b = np.array((b.detach()+1.0)/2*225)
+    b = b[:,:,[-69, -27, -11]].astype(np.uint8)
+    print(b.shape)
+    b = Image.fromarray(b)
+    b.save(args.save_path+args.data+"/reconstructed_image.png")
 
     print('finished')
 

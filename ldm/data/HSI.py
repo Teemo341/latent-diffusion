@@ -6,6 +6,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision import transforms
 from scipy.io import loadmat
+from einops import rearrange
 
 
 class HSIBase(Dataset):
@@ -65,7 +66,9 @@ class HSIBase(Dataset):
             example["value_max"]=max_value
             image = (image-min_value)/max_value*255
 
+        image = rearrange(image, 'h w c -> c h w')
         image = self.flip(image)
+        image = rearrange(image, 'c h w -> h w c')
         image = np.array(image).astype(np.uint8)
         example["image"] = (image / 127.5 - 1.0).astype(np.float32)
         return example
@@ -80,3 +83,14 @@ class Indian_Pines_Corrected(HSIBase):
         whole_image = np.array(whole_image,dtype=np.float32)
         #(145, 145, 200)
         return whole_image
+
+
+if __name__=='__main__':
+    a = Indian_Pines_Corrected()
+    # b = a.__getitem__(0)["image"]
+    # b = (b+1.0)/2*225
+    b = np.array(a.whole_image)
+    b = b[:,:,[-69, -27, -11]].astype(np.uint8)
+    print(b.shape)
+    b = Image.fromarray(b)
+    b.save("here.png")

@@ -1,3 +1,6 @@
-12996
-Restored from models/first_stage_models/HSI/VCA/model.ckpt
+SNR estimated = 0.7658952474594116[dB]
+... Select proj. to R-1
+(145, 145, 3)
+torch.Size([1, 145, 145, 200])
+(145, 145, 3)
 finished

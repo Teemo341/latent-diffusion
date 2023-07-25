@@ -90,3 +90,11 @@ class LSUNCatsValidation(LSUNBase):
     def __init__(self, flip_p=0., **kwargs):
         super().__init__(txt_file="data/lsun/cat_val.txt", data_root="data/lsun/cats",
                          flip_p=flip_p, **kwargs)
+
+if __name__=='__main__':
+    a = LSUNChurchesTrain()
+    b = a.__getitem__(0)["image"]
+    b = (b+1.0)/2*225
+    b = b[:,:,].astype(np.uint8)
+    print(b.shape)
+    b = Image.fromarray(b)
