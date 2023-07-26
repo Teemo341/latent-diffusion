@@ -10,7 +10,7 @@ model:
     loss_type: l1
     first_stage_key: "image"
     cond_stage_key: "image"
-    image_size: 32
+    image_size: 64
     channels: 40
     cond_stage_trainable: False
     concat_mode: False
@@ -30,8 +30,8 @@ model:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
         image_size: 32
-        in_channels: 40
-        out_channels: 40
+        in_channels: 16
+        out_channels: 16
         model_channels: 192
         attention_resolutions: [ 1, 2, 4, 8 ]   # 32, 16, 8, 4
         num_res_blocks: 2
@@ -44,7 +44,7 @@ model:
       target: ldm.models.hsi_encoder.VCA
       params:
         in_channels: 200
-        out_channels: 40
+        out_channels: 16
         ckpt_path: "models/first_stage_models/HSI/VCA/Indian_Pines_Corrected/model.ckpt"
 
     cond_stage_config: "__is_unconditional__"
@@ -68,7 +68,7 @@ lightning:
         batch_frequency: 1000
         max_images: 8
         increase_log_steps: False
-        visual_channels: [-69, -27, -11]
+        visual_channels: [36,17,11]
         log_images_kwargs:
           quantize_denoised: False
           inpaint : False
@@ -79,3 +79,4 @@ lightning:
 
   trainer:
     benchmark: True
+    max_epochs: 200

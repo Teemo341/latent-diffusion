@@ -1,6 +1,9 @@
-SNR estimated = 0.7658952474594116[dB]
-... Select proj. to R-1
+max value: 8192
+SNR estimated = 30.74062728881836[dB]
+... Select the projective proj.
 (145, 145, 3)
 torch.Size([1, 145, 145, 200])
+tensor(-1.0541, grad_fn=<MinBackward1>) tensor(1.2134, grad_fn=<MaxBackward1>)
+(145, 145, 3)
 (145, 145, 3)
 finished

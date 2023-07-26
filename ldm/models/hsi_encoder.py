@@ -282,6 +282,7 @@ if __name__ == '__main__':
 
     if args.data == 'Indian_Pines_Corrected':
        dataset = datasets_all.Indian_Pines_Corrected()
+       print('max value:',dataset.get_max())
        image = dataset.__getitem__(0)['image']#hwc
 
     h,w,c = image.shape
@@ -297,7 +298,7 @@ if __name__ == '__main__':
 
     # show inputs and reconstructions
     b = (image+1.0)/2*225
-    b = b[:,:,[-69, -27, -11]].astype(np.uint8)
+    b = b[:,:,[37,19,8]].astype(np.uint8)
     print(b.shape)
     b = Image.fromarray(b)
     b.save(args.save_path+args.data+"/original_image.png")
@@ -307,11 +308,22 @@ if __name__ == '__main__':
     b = b[None,...]# bhwc
     print(b.shape)
     b = rearrange(b,'b h w c -> b c h w')
+    z = model.encode(b)
+
+    z = rearrange(z, 'b c h w -> b h w c')
+    z = z[0,:,:,:]
+    print(z.min(),z.max())
+    z = np.array(((z-z.min())/(z.max()-z.min())).detach()*225)
+    z = z[:,:,[1,1,1]].astype(np.uint8)
+    print(z.shape)
+    z = Image.fromarray(z)
+    z.save(args.save_path+args.data+"/abundance_image.png")
+
     b = model(b)
     b = rearrange(b, 'b c h w -> b h w c')
     b = b[0,:,:,:]
     b = np.array((b.detach()+1.0)/2*225)
-    b = b[:,:,[-69, -27, -11]].astype(np.uint8)
+    b = b[:,:,[37,19,8]].astype(np.uint8)
     print(b.shape)
     b = Image.fromarray(b)
     b.save(args.save_path+args.data+"/reconstructed_image.png")
