@@ -10,12 +10,12 @@ model:
     loss_type: l1
     first_stage_key: "image"
     cond_stage_key: "image"
-    image_size: 64
-    channels: 40
+    image_size: 32
+    channels: 16
     cond_stage_trainable: False
     concat_mode: False
     scale_by_std: True
-    monitor: 'train/loss_simple'
+    monitor: 'val/loss_simple_ema'
 
     scheduler_config: # 10000 warmup steps
       target: ldm.lr_scheduler.LambdaLinearScheduler
@@ -56,7 +56,11 @@ data:
     num_workers: 5
     wrap: False
     train:
-      target: ldm.data.HSI.Indian_Pines_Corrected
+      target: ldm.data.HSI.Indian_Pines_Corrected_train
+      params:
+        size: 32
+    validation:
+      target: ldm.data.HSI.Indian_Pines_Corrected_valid
       params:
         size: 32
 
@@ -79,4 +83,4 @@ lightning:
 
   trainer:
     benchmark: True
-    max_epochs: 200
+    max_epochs: 20

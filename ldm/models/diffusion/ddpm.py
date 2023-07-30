@@ -1393,6 +1393,7 @@ class LatentDiffusion(DDPM):
                     t = t.to(self.device).long()
                     noise = torch.randn_like(z_start)
                     z_noisy = self.q_sample(x_start=z_start, t=t, noise=noise)
+                    print(extract_into_tensor(self.sqrt_alphas_cumprod, t, z_start.shape).reshape(-1)[0],extract_into_tensor(self.sqrt_one_minus_alphas_cumprod, t, z_start.shape).reshape(-1)[0])
                     diffusion_row.append(self.decode_first_stage(z_noisy))
 
             # n_log_step, n_row, C, H, W

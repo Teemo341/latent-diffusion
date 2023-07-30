@@ -1,0 +1,86 @@
+model:
+  base_learning_rate: 5.0e-5   # set to target_lr by starting main.py with '--scale_lr False'
+  target: ldm.models.diffusion.ddpm.LatentDiffusion
+  params:
+    linear_start: 0.0015
+    linear_end: 0.0155
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    loss_type: l1
+    first_stage_key: "image"
+    cond_stage_key: "image"
+    image_size: 32
+    channels: 6
+    cond_stage_trainable: False
+    concat_mode: False
+    scale_by_std: True
+    monitor: 'val/loss_simple_ema'
+
+    scheduler_config: # 10000 warmup steps
+      target: ldm.lr_scheduler.LambdaLinearScheduler
+      params:
+        warm_up_steps: [10000]
+        cycle_lengths: [10000000000000]
+        f_start: [1.e-6]
+        f_max: [1.]
+        f_min: [ 1.]
+
+    unet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 32
+        in_channels: 6
+        out_channels: 6
+        model_channels: 192
+        attention_resolutions: [ 1, 2, 4, 8 ]   # 32, 16, 8, 4
+        num_res_blocks: 2
+        channel_mult: [ 1,2,2,4,4 ]  # 32, 16, 8, 4, 2
+        num_heads: 8
+        use_scale_shift_norm: True
+        resblock_updown: True
+
+    first_stage_config:
+      target: ldm.models.hsi_encoder.VCA
+      params:
+        in_channels: 204
+        out_channels: 6
+        ckpt_path: "models/first_stage_models/HSI/VCA/Salinas_Corrected/model.ckpt"
+
+    cond_stage_config: "__is_unconditional__"
+
+data:
+  target: main_HSI.DataModuleFromConfig
+  params:
+    batch_size: 32
+    num_workers: 5
+    wrap: False
+    train:
+      target: ldm.data.HSI.Salinas_Corrected_train
+      params:
+        size: 32
+    validation:
+      target: ldm.data.HSI.Salinas_Corrected_train
+      params:
+        size: 32
+
+lightning:
+  callbacks:
+    image_logger:
+      target: main_HSI.ImageLogger_HSI
+      params:
+        batch_frequency: 1000
+        max_images: 8
+        increase_log_steps: False
+        visual_channels: [36,17,11]
+        log_images_kwargs:
+          quantize_denoised: False
+          inpaint : False
+          plot_denoise_rows : False
+          plot_progressive_rows : True
+          plot_diffusion_rows : True
+
+
+  trainer:
+    benchmark: True
+    max_epochs: 20

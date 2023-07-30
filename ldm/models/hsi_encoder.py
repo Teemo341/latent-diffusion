@@ -6,6 +6,8 @@ import sys,os
 import torch.linalg as splin
 import numpy as np
 from einops import rearrange, repeat
+import random
+import matplotlib.pyplot as plt
 
 from taming.modules.vqvae.quantize import VectorQuantizer2 as VectorQuantizer
 
@@ -185,6 +187,71 @@ class VCA(pl.LightningModule):
         self.load_state_dict(sd, strict=False)
         print(f"Restored from {path}")
 
+    
+
+    def encode_(self,x):
+      # https://github.com/isaacgerg/matlabHyperspectralToolbox/blob/master/hyperspectralToolbox/hyperFcls.m
+      # %HYPERFCLS Performs fully constrained least squares on pixels of M.
+      # % hyperFcls performs fully constrained least squares of each pixel in M 
+      # % using the endmember signatures of U.  Fully constrained least squares 
+      # % is least squares with the abundance sum-to-one constraint (ASC) and the 
+      # % abundance nonnegative constraint (ANC).
+      # %
+      # % Usage
+      # %   [ X ] = hyperFcls( M, U )
+      # % Inputs
+      # %   M - HSI data matrix (p x N)
+      # %   U - Matrix of endmembers (p x q)
+      # % Outputs
+      # %   X - Abundance maps (q x N)
+      # %
+      # % References
+      # %   "Fully Constrained Least-Squares Based Linear Unmixing." Daniel Heinz, 
+      # % Chein-I Chang, and Mark L.G. Althouse. IEEE. 1999.
+
+      b_,c_,h_,w_ = x.shape
+      Y = rearrange(x,'b c h w -> c (b h w)',b=b_,c=c_,h=h_,w=w_)
+      [p1, N] = Y.shape
+      [p2, q] = self.end_members.shape
+      p = p1
+      X = torch.zeros([q, N]);
+      U = self.end_members.clone()
+      for n1 in range(N):
+          count = q
+          done = 0
+          ref = torch.arange(0,q)
+          r = Y[:, n1]
+          U = self.end_members.clone()
+          while not(done):
+              U_inv = splin.inv(torch.matmul(U.T,U))
+              als_hat = torch.matmul(U_inv,torch.matmul(U.T,r))
+              s = torch.matmul(U_inv,torch.ones(count, 1)).reshape(-1)
+              afcls_hat = als_hat - (U_inv@torch.ones(count, 1)).reshape(-1)*splin.inv(torch.ones(1, count)@U_inv@torch.ones(count, 1))*(torch.ones(1, count)@als_hat-1)
+              afcls_hat = afcls_hat.reshape(-1)
+
+              # % See if all components are positive.  If so, then stop.
+              if (torch.sum(afcls_hat>0) == count):
+                  alpha = torch.zeros(q)
+                  alpha[ref] = afcls_hat
+                  break;
+              # % Multiply negative elements by their counterpart in the s vector.
+              # % Find largest abs(a_ij, s_ij) and remove entry from alpha.
+              idx = torch.where(afcls_hat<0)[0]
+              afcls_hat[idx] = afcls_hat[idx]/s[idx]
+              [val, maxIdx] = torch.max(torch.abs(afcls_hat[idx]),dim=0)
+              maxIdx = idx[maxIdx]
+              # alpha[maxIdx] = 0 #? not sure
+              keep = torch.tensor(list(set(range(U.shape[1])) - {int(maxIdx)}), dtype=torch.long)
+              U = U[:, keep]
+              count = count - 1;
+              ref = ref[keep]
+          X[:, n1] = alpha.squeeze()
+
+      c_ = self.out_channels
+      z = rearrange(X, 'c (b h w) -> b c h w',b=b_,c=c_,h=h_,w=w_)
+      z = torch.clamp(z,-1,1)
+      return z
+
     def encode(self, x):
         # Y = Ae*X
         # Ae.T*Y = Ae.T*Ae*X
@@ -275,15 +342,30 @@ class IdentityFirstStage(torch.nn.Module):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Domain generalization')
-    parser.add_argument('--data', type=str,help='allpy vca on which HSI data',choices=['Indian_Pines_Corrected'])
+    parser.add_argument('--data', type=str,help='allpy vca on which HSI data',choices=['Indian_Pines_Corrected','KSC_Corrected','Pavia','PaviaU','Salinas_Corrected'])
     parser.add_argument('--save_path',type = str,default="./models/first_stage_models/HSI/VCA/")
     parser.add_argument('--feature_channels',type = int,default=20)
+    parser.add_argument('--visual_channels',type = int,default=[28,9,10],nargs='+')
+    parser.add_argument('--seed',type = int,default=0)
     args = parser.parse_args()
+
+    if args.seed:
+      random.seed(args.seed)
 
     if args.data == 'Indian_Pines_Corrected':
        dataset = datasets_all.Indian_Pines_Corrected()
-       print('max value:',dataset.get_max())
-       image = dataset.__getitem__(0)['image']#hwc
+    elif args.data == 'KSC_Corrected':
+       dataset = datasets_all.KSC_Corrected()
+    elif args.data == 'Pavia':
+       dataset = datasets_all.Pavia()
+    elif args.data == 'PaviaU':
+       dataset = datasets_all.PaviaU()
+    elif args.data == 'Salinas_Corrected':
+       dataset = datasets_all.Salinas_Corrected()
+
+
+    print('max value:',dataset.get_max())
+    image = dataset.__getitem__(0)['image']#hwc
 
     h,w,c = image.shape
     model = VCA(in_channels=c,out_channels=args.feature_channels)
@@ -298,35 +380,52 @@ if __name__ == '__main__':
 
     # show inputs and reconstructions
     b = (image+1.0)/2*225
-    b = b[:,:,[37,19,8]].astype(np.uint8)
-    print(b.shape)
+    b = b[:,:,args.visual_channels].astype(np.uint8)
+    print('input',b.shape)
     b = Image.fromarray(b)
     b.save(args.save_path+args.data+"/original_image.png")
 
     b = image
     b = torch.tensor(b)
     b = b[None,...]# bhwc
-    print(b.shape)
     b = rearrange(b,'b h w c -> b c h w')
     z = model.encode(b)
+    print('abundance',z.shape)
 
-    z = rearrange(z, 'b c h w -> b h w c')
-    z = z[0,:,:,:]
-    print(z.min(),z.max())
-    z = np.array(((z-z.min())/(z.max()-z.min())).detach()*225)
-    z = z[:,:,[1,1,1]].astype(np.uint8)
-    print(z.shape)
-    z = Image.fromarray(z)
-    z.save(args.save_path+args.data+"/abundance_image.png")
+    z_ = rearrange(z, 'b c h w -> b h w c')
+    z_ = z_[0,:,:,:]
+    z_ = z_.reshape(-1)
+    plt.figure(1)
+    plt.hist(z_.detach().numpy(), bins=40, facecolor="blue", edgecolor="black", alpha=0.7)
+    plt.savefig(args.save_path+args.data+"/hist_image.png")
+    z_ = rearrange(z, 'b c h w -> b h w c')
+    z_ = z_[0,:,:,:]
+    print('z value range',z_.min(),z_.max(),z_.abs().min())
+    z_ = np.array(((z_-z_.min())/(z_.max()-z_.min())).detach()*225)
+    z_ = z_[:,:,[1,1,1]].astype(np.uint8)
+    z_ = Image.fromarray(z_)
+    z_.save(args.save_path+args.data+"/abundance_image.png")
 
-    b = model(b)
-    b = rearrange(b, 'b c h w -> b h w c')
-    b = b[0,:,:,:]
-    b = np.array((b.detach()+1.0)/2*225)
-    b = b[:,:,[37,19,8]].astype(np.uint8)
-    print(b.shape)
-    b = Image.fromarray(b)
-    b.save(args.save_path+args.data+"/reconstructed_image.png")
+    b_ = model.decode(z)
+    b_ = rearrange(b_, 'b c h w -> b h w c')
+    b_ = b_[0,:,:,:]
+    b_ = np.array((b_.detach()+1.0)/2*225)
+    b_ = b_[:,:,args.visual_channels].astype(np.uint8)
+    print('resonstruct',b_.shape)
+    b_ = Image.fromarray(b_)
+    b_.save(args.save_path+args.data+"/reconstructed_image.png")
+
+    z_ = z
+    z_ = z_*0.5233 + torch.randn_like(z_)*0.8521
+    b_ = model.decode(z_)
+    b_ = rearrange(b_, 'b c h w -> b h w c')
+    b_ = b_[0,:,:,:]
+    b_ = np.array((b_.detach()+1.0)/2*225)
+    b_ = b_[:,:,args.visual_channels].astype(np.uint8)
+    b_ = Image.fromarray(b_)
+    b_.save(args.save_path+args.data+"/reconstructed_noise_image.png")
+
+    
 
     print('finished')
 
