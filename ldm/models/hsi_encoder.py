@@ -402,7 +402,7 @@ if __name__ == '__main__':
     z_ = z_[0,:,:,:]
     print('z value range',z_.min(),z_.max(),z_.abs().min())
     z_ = np.array(((z_-z_.min())/(z_.max()-z_.min())).detach()*225)
-    z_ = z_[:,:,[1,1,1]].astype(np.uint8)
+    z_ = z_[:,:,[0,1,2]].astype(np.uint8)
     z_ = Image.fromarray(z_)
     z_.save(args.save_path+args.data+"/abundance_image.png")
 

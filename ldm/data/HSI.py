@@ -153,7 +153,7 @@ class Pavia(HSIBase):
         return whole_image   
 class Pavia_train(Pavia):
     def __init__(self, **kwargs):
-        super().__init__(split='valid', **kwargs)
+        super().__init__(split='train', **kwargs)
 class Pavia_valid(Pavia):
     def __init__(self, **kwargs):
         super().__init__(split='valid', **kwargs)
@@ -171,7 +171,7 @@ class PaviaU(HSIBase):
 
 class PaviaU_train(PaviaU):
     def __init__(self, **kwargs):
-        super().__init__(split='valid', **kwargs)
+        super().__init__(split='train', **kwargs)
 class PaviaU_valid(PaviaU):
     def __init__(self, **kwargs):
         super().__init__(split='valid', **kwargs)
@@ -188,7 +188,7 @@ class Salinas_Corrected(HSIBase):
         return whole_image
 class Salinas_Corrected_train(Salinas_Corrected):
     def __init__(self, **kwargs):
-        super().__init__(split='valid', **kwargs)
+        super().__init__(split='train', **kwargs)
 class Salinas_Corrected_valid(Salinas_Corrected):
     def __init__(self, **kwargs):
         super().__init__(split='valid', **kwargs)
