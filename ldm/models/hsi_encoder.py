@@ -256,20 +256,25 @@ class VCA(pl.LightningModule):
         # Y = Ae*X
         # Ae.T*Y = Ae.T*Ae*X
         #(Ae.T*Ae)**-1*Ae.T*Y = X
+        
+        x = x+1.0 # for unmixing, all members should be >0, so [-1,1]->[0,2]
         b_,c_,h_,w_ = x.shape
         Y = rearrange(x,'b c h w -> c (b h w)',b=b_,c=c_,h=h_,w=w_)
         X_ = torch.matmul(torch.linalg.inv(torch.matmul(self.end_members.T,self.end_members)),torch.matmul(self.end_members.T,Y))
         c_ = self.out_channels
         z = rearrange(X_, 'c (b h w) -> b c h w',b=b_,c=c_,h=h_,w=w_)
+        z = z*2.0-1.0 # for unmixing, z should be about [0,1], so [0,1]->[-1,1]
         return z
 
 
     def decode(self, z):
+        z = (z+1.0)/2.0 # for unmixing, z should be about [0,1]
         b_,c_,h_,w_ = z.shape
         X = rearrange(z,'b c h w -> c (b h w)',b=b_,c=c_,h=h_,w=w_)
         Y = torch.matmul(self.end_members,X)
         c_ = self.in_channels
         dec = rearrange(Y,'c (b h w) -> b c h w',b=b_,c=c_,h=h_,w=w_)
+        dec = dec-1.0 # for unmixing, return to [-1,1]
         return dec
     
 
@@ -312,6 +317,8 @@ class VCA(pl.LightningModule):
 
 
 def update_endmembers(VCA_module, whole_image):
+    whole_image = whole_image+1.0 # for unmixing, all members should be >0, so [-1,1]->[0,2]
+    
     # whole_image = rearrange(whole_image,'c h w -> c (h w)')
     whole_image = rearrange(whole_image,'h w c -> c (h w)')
     Ae,indice,Yp = vca(whole_image,VCA_module.out_channels)

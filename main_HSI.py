@@ -286,7 +286,7 @@ class SetupCallback(Callback):
                     pass
 
 
-class ImageLogger(Callback):#TODO add HSI image logger
+class ImageLogger(Callback):
     def __init__(self, batch_frequency, max_images, clamp=True, increase_log_steps=True,
                  rescale=True, disabled=False, log_on_batch_idx=False, log_first_step=False,
                  log_images_kwargs=None):
@@ -449,6 +449,10 @@ class ImageLogger_HSI(ImageLogger):
                 if len(images[k].shape)==3: # already hsi grid,[c,h,w]
                     images[k] = images[k][self.visual_channels,:,:]
                 elif k=='mask': #[b,1,h,w]
+                    N = min(images[k].shape[0], self.max_images)
+                    images[k] = images[k][:N]
+                elif k in ['inputs_z','samples_z','progressive_row_z']: # hsi batch latent
+                    images[k]=images[k][:,0:3,:,:]
                     N = min(images[k].shape[0], self.max_images)
                     images[k] = images[k][:N]
                 else:# hsi batch image [b,c,h,w]

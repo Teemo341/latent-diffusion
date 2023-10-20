@@ -1353,7 +1353,7 @@ class LatentDiffusion(DDPM):
     @torch.no_grad()
     def log_images(self, batch, N=8, n_row=4, sample=True, ddim_steps=200, ddim_eta=1., return_keys=None,
                    quantize_denoised=True, inpaint=True, plot_denoise_rows=False, plot_progressive_rows=True,
-                   plot_diffusion_rows=True, plot_latent = True, **kwargs):
+                   plot_diffusion_rows=True, plot_latent = False, **kwargs):
 
         use_ddim = ddim_steps is not None
     
@@ -1366,6 +1366,8 @@ class LatentDiffusion(DDPM):
         N = min(x.shape[0], N)
         n_row = min(x.shape[0], n_row)
         log["inputs"] = x
+        if plot_latent:
+            log["inputs_z"] = z
         log["reconstruction"] = xrec
         if self.model.conditioning_key is not None:
             if hasattr(self.cond_stage_model, "decode"):
@@ -1413,6 +1415,8 @@ class LatentDiffusion(DDPM):
                 # samples, z_denoise_row = self.sample(cond=c, batch_size=N, return_intermediates=True)
             x_samples = self.decode_first_stage(samples)
             log["samples"] = x_samples
+            if plot_latent:
+                log["samples_z"] = samples
             if plot_denoise_rows:
                 #! maybe a problem, not sure
                 if use_ddim:
@@ -1463,6 +1467,8 @@ class LatentDiffusion(DDPM):
             prog_row = self._get_denoise_row_from_list(
                 progressives, desc="Progressive Generation")
             log["progressive_row"] = prog_row
+            if plot_latent:
+                log["progressive_row_z"] = progressives
 
         if return_keys:
             if np.intersect1d(list(log.keys()), return_keys).shape[0] == 0:
