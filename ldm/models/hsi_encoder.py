@@ -386,8 +386,9 @@ if __name__ == '__main__':
     torch.save(stat,path)
 
     # show inputs and reconstructions
-    b = (image+1.0)/2*225
-    b = b[:,:,args.visual_channels].astype(np.uint8)
+    b = (image+1.0)/2.0
+    b = b[:,:,args.visual_channels]
+    b = (b*255).astype(np.uint8)
     print('input',b.shape)
     b = Image.fromarray(b)
     b.save(args.save_path+args.data+"/original_image.png")

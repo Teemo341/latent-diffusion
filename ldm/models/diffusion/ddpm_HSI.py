@@ -1468,7 +1468,12 @@ class LatentDiffusion(DDPM):
                 progressives, desc="Progressive Generation")
             log["progressive_row"] = prog_row
             if plot_latent:
-                log["progressive_row_z"] = progressives
+                n_imgs_per_row = len(progressives)
+                denoise_row = torch.stack(progressives)  # n_log_step, n_row, C, H, W
+                denoise_grid = rearrange(denoise_row, 'n b c h w -> b n c h w')
+                denoise_grid = rearrange(denoise_grid, 'b n c h w -> (b n) c h w')
+                denoise_grid = make_grid(denoise_grid, nrow=n_imgs_per_row)
+                log["progressive_row_z"] = denoise_grid
 
         if return_keys:
             if np.intersect1d(list(log.keys()), return_keys).shape[0] == 0:
