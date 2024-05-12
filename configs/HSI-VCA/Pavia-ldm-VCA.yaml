@@ -11,7 +11,7 @@ model:
     first_stage_key: "image"
     cond_stage_key: "image"
     image_size: 32
-    channels: 15
+    channels: 9
     cond_stage_trainable: False
     concat_mode: False
     scale_by_std: False
@@ -31,8 +31,8 @@ model:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
         image_size: 32
-        in_channels: 15
-        out_channels: 15
+        in_channels: 9
+        out_channels: 9
         model_channels: 224
         attention_resolutions: [ 4,2,1 ]   # 8,4,4
         num_res_blocks: 2
@@ -45,7 +45,7 @@ model:
       target: ldm.models.hsi_encoder.VCA
       params:
         in_channels: 102
-        out_channels: 15
+        out_channels: 9
         ckpt_path: "models/first_stage_models/HSI/VCA/Pavia/model.ckpt"
 
     cond_stage_config: "__is_unconditional__"
