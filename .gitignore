@@ -22,4 +22,4 @@ bin-release/
 /models
 /src
 /experiments/models/checkpoints
-# /experiments/**/*.npy
+/experiments/**/*.npy
