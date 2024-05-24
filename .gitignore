@@ -21,5 +21,6 @@ bin-release/
 /logs
 /models
 /src
-/experiments/models/checkpoints
+/experiments/**/checkpoints
 /experiments/**/*.npy
+/experiments/**/*.png

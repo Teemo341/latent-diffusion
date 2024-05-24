@@ -18,7 +18,7 @@ class HSIBase(Dataset):
                  split = None,
                  split_rate = 0.8,
                  value_range = None,
-                 flip_p=0.5
+                 augment = True,
                  ):
         #data_root: dir of .mat file
         #size: hw, None means whole image
@@ -35,7 +35,14 @@ class HSIBase(Dataset):
         self.size = size
         self.split = split
         self.split_rate = split_rate
-        self.flip = transforms.RandomHorizontalFlip(p=flip_p)
+        if augment:
+            self.augment_method = transforms.Compose([
+                transforms.RandomHorizontalFlip(0.5),
+                transforms.RandomVerticalFlip(0.5),
+                transforms.RandomRotation(90),
+            ])
+        else:
+            self.augment_method = None
         assert self.size ==None or (self.size <= self.whole_image.shape[0] and self.size <= self.whole_image.shape[1])
 
     def read_data(self, data_root):
@@ -95,14 +102,15 @@ class HSIBase(Dataset):
         image_label = torch.cat([image, label], dim=2)
 
         image_label = rearrange(image_label, 'h w c -> c h w')
-        image_label = self.flip(image_label)
+        if self.augment_method:
+            image_label = self.augment_method(image_label)
         image_label = rearrange(image_label, 'c h w -> h w c')
         image = image_label[:,:,:image_channel]
         label = image_label[:,:,image_channel:]
 
         image = np.array(image)
         example["image"] = (image / 127.5 - 1.0).astype(np.float32)
-        example["label"] = np.array(label).astype(np.uint8)
+        example["label"] = np.array(label).astype(np.float32)
         return example
     
     def get_max(self):

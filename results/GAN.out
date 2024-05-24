@@ -1,0 +1,11 @@
+Start training Indian_Pines_Corrected dataset
+Epoch [1/20], Step [203/407], d_loss: 0.1246, g_loss: 6.9968
+Epoch [1/20], Step [406/407], d_loss: 0.0624, g_loss: 8.9454
+Epoch [2/20], Step [203/407], d_loss: 0.0001, g_loss: 12.9162
+Epoch [2/20], Step [406/407], d_loss: 0.0000, g_loss: 12.8432
+Epoch [3/20], Step [203/407], d_loss: 0.0000, g_loss: 14.1755
+Epoch [3/20], Step [406/407], d_loss: 0.0000, g_loss: 14.2003
+Epoch [4/20], Step [203/407], d_loss: 0.0000, g_loss: 15.2321
+Epoch [4/20], Step [406/407], d_loss: 0.0000, g_loss: 16.0545
+Epoch [5/20], Step [203/407], d_loss: 0.0000, g_loss: 17.2480
+Epoch [5/20], Step [406/407], d_loss: 0.0000, g_loss: 18.9304

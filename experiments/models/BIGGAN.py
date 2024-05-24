@@ -10,68 +10,28 @@ import matplotlib.pyplot as plt
 from einops import rearrange
 from ldm.data.HSI import *
 import numpy as np
+from torchsummary import summary
 
-class D_dcgan(nn.Module):
-    '''滑动卷积判别器'''
+
+class DimReducer(nn.Module):
     def __init__(self):
-        super(D_dcgan, self).__init__()
-        self.conv = nn.Sequential(
-            # 第一个滑动卷积层，不使用BN，LRelu激活函数
-            nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, stride=2, padding=1),
-            nn.LeakyReLU(0.2, inplace=True),
-            # 第二个滑动卷积层，包含BN，LRelu激活函数
-            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm2d(32),
-            nn.LeakyReLU(0.2, inplace=True),
-            # 第三个滑动卷积层，包含BN，LRelu激活函数
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm2d(64),
-            nn.LeakyReLU(0.2, inplace=True),
-            # 第四个滑动卷积层，包含BN，LRelu激活函数
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=4, stride=1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2, inplace=True)
+        super(DimReducer, self).__init__()
+        self.network = nn.Sequential(
+            nn.Linear(200, 100),
+            nn.ReLU(),
+            nn.Linear(100, 50),
+            nn.ReLU(),
+            nn.Linear(50, 25),
+            nn.ReLU(),
+            nn.Linear(25, 10),
+            nn.ReLU(),
+            nn.Linear(10, 5),
+            nn.ReLU(),
+            nn.Linear(5, 1)
         )
-
-        # 全连接层+Sigmoid激活函数
-        self.linear = nn.Sequential(nn.Linear(in_features=128, out_features=1), nn.Sigmoid())
-
+        
     def forward(self, x):
-        x = self.conv(x)
-        x = x.view(x.size(0), -1)
-        validity = self.linear(x)
-        return validity
-
-class G_dcgan(nn.Module):
-    '''反滑动卷积生成器'''
-
-    def __init__(self, z_dim):
-        super(G_dcgan, self).__init__()
-        self.z_dim = z_dim
-        # 第一层：把输入线性变换成256x4x4的矩阵，并在这个基础上做反卷机操作
-        self.linear = nn.Linear(self.z_dim, 4*4*256)
-        self.model = nn.Sequential(
-            # 第二层：bn+relu
-            nn.ConvTranspose2d(in_channels=256, out_channels=128, kernel_size=3, stride=2, padding=0),
-            nn.BatchNorm2d(128),
-            nn.ReLU(inplace=True),
-            # 第三层：bn+relu
-            nn.ConvTranspose2d(in_channels=128, out_channels=64, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(inplace=True),
-            # 第四层:不使用BN，使用tanh激活函数
-            nn.ConvTranspose2d(in_channels=64, out_channels=1, kernel_size=4, stride=2, padding=2),
-            nn.Tanh()
-        )
-
-    def forward(self, z):
-        # 把随机噪声经过线性变换，resize成256x4x4的大小
-        x = self.linear(z)
-        x = x.view([x.size(0), 256, 4, 4])
-        # 生成图片
-        x = self.model(x)
-        return x
-
+        return self.network(x)
 # 定义编解码器
 class ResBlock(nn.Module):
     def __init__(self, dim):
@@ -118,45 +78,6 @@ class UpBlock(nn.Module): # only upsample the spectral dimension
         x = self.conv_relu(x)
         return x
 
-class Encoder(nn.Module):
-    def __init__(self, dim, hidden_dim=8):
-        super(Encoder, self).__init__()
-        self.down = nn.ModuleList()
-        i = 0
-        while dim//2 > hidden_dim:
-            self.down.append(DownBlock(dim))
-            dim = dim // 2
-            i = i+1
-            # print(i, dim)
-        self.down.append(DownBlock(dim,hidden_dim))
-        self.resblock1 = ResBlock(hidden_dim)
-    def forward(self, x):
-        for i in range(len(self.down)):
-            layer = self.down[i]
-            x = layer(x)
-        x = self.resblock1(x)
-        return x
-    
-class Decoder(nn.Module):
-    def __init__(self, dim, hidden_dim=8):
-        super(Decoder, self).__init__()
-        self.resblock1 = ResBlock(hidden_dim)
-        self.up = nn.ModuleList()
-        i = 0
-        while dim//2 > hidden_dim:
-            self.up.append(UpBlock(dim))
-            dim = dim // 2
-            i = i+1
-        self.up.append(UpBlock(dim,hidden_dim))
-
-    def forward(self, x):
-        x = self.resblock1(x)
-        for i in reversed(range(len(self.up))):
-            layer = self.up[i]
-            # print(i, layer.shape, x.shape)
-            x = layer(x)
-        return x
-
 class DownBlock_2(nn.Module): # only downsample the spectral dimension
     def __init__(self, in_channels, out_channels=None):
         super(DownBlock_2, self).__init__()
@@ -198,16 +119,17 @@ class Decoder_2(nn.Module):
         self.up = nn.ModuleList()
         i = 0
         while dim//2 > hidden_dim:
+            self.up.append(ResBlock(dim))
             self.up.append(UpBlock(dim))
             dim = dim // 2
             i = i+1
+        self.up.append(ResBlock(dim))
         self.up.append(UpBlock(dim,hidden_dim))
 
     def forward(self, x):
         x = self.resblock1(x)
         for i in reversed(range(len(self.up))):
             layer = self.up[i]
-            # print(i, layer.shape, x.shape)
             x = layer(x)
         return x
     
@@ -216,9 +138,9 @@ class Decoder_2(nn.Module):
 class Generator(nn.Module):
     def __init__(self, latnet_dim, hidden_dim=1):
         super(Generator, self).__init__()
-        self.linear = nn.Linear(latnet_dim,1)
-        #self.encoder = Encoder_2(latnet_dim,hidden_dim)
+        self.linear = DimReducer()
         self.decoder = Decoder_2(latnet_dim,hidden_dim)
+
     def forward(self, x):
         x = rearrange(x, 'b c h w -> b h w c')
         x = self.linear(x)
@@ -253,8 +175,8 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
 
     # 定义损失函数和优化器
     criterion = nn.BCELoss()  # 二分类交叉熵损失函数
-    optimizer_G = optim.Adam(generator.parameters(), lr=2e-4, betas=(0.5, 0.999))  # 生成器的优化器
-    optimizer_D = optim.Adam(discriminator.parameters(), lr=7e-6, betas=(0.5, 0.999))  # 判别器的优化器
+    optimizer_G = optim.Adam(generator.parameters(), lr=1e-5, betas=(0.5, 0.999))  # 生成器的优化器
+    optimizer_D = optim.Adam(discriminator.parameters(), lr=2e-4, betas=(0.5, 0.999))  # 判别器的优化器
     #scheduler = optim.lr_scheduler.StepLR(optimizer_D, step_size=30, gamma=0.1) #学习率的调节器
 
 
@@ -291,9 +213,12 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
             # 训练判别器
             for _ in range(d_step):
                 optimizer_D.zero_grad()
+                optimizer_G.zero_grad()
                 real_outputs = discriminator(real_images.to(device)) # 计算真实图像的输出
                 real_loss = criterion(real_outputs, torch.ones_like(real_outputs).to(device)) # real_label 1
 
+                z = torch.randn(real_images.shape).to(device) # 生成假图像
+                fake_images = generator(z)
                 fake_outputs = discriminator(fake_images.detach()) # 计算假图像的输出
                 fake_loss = criterion(fake_outputs, torch.zeros_like(fake_outputs).to(device)) #fake_label 0
 
@@ -301,26 +226,29 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
                 d_loss.backward()
                 # nn.utils.clip_grad_norm_(parameters=discriminator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
                 optimizer_D.step()
-                #scheduler.step()
+                # scheduler.step()
                 
             if epoch > warmup_epoches:
             # 训练生成器
                 for _ in range(g_step):
                     optimizer_G.zero_grad()
+                    optimizer_D.zero_grad()
                     z = torch.randn(real_images.shape).to(device) # 生成假图像
                     fake_images = generator(z)
                     fake_outputs = discriminator(fake_images)
-                    g_loss = criterion(fake_outputs, torch.ones_like(fake_outputs).to(device))
+                    g_loss = -1 * criterion(fake_outputs, torch.zeros_like(fake_outputs).to(device))
+                    # print(g_loss)
                     g_loss.backward()
-            # nn.utils.clip_grad_norm_(parameters=generator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
+                    nn.utils.clip_grad_norm_(parameters=generator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
                     optimizer_G.step()
+
             if "g_loss" in locals():
-                if (i+1) % int(len(dataloader)/2) == 0: #一轮打印两次
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(dataloader)}], d_loss: {d_loss.item():.4f}, g_loss: {g_loss.item():.4f}")
+                if (i+1) % int(len(train_loader)/2) == 0: #一轮打印两次
+                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss: {d_loss.item():.4f}, g_loss: {g_loss.item():.4f}")
 
             else:
-                if (i+1) % int(len(dataloader)/2) == 0: #一轮打印两次
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(dataloader)}], d_loss: {d_loss.item():.4f}")        
+                if (i+1) % int(len(train_loader)/2) == 0: #一轮打印两次
+                     print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss: {d_loss.item():.4f}")        
         # early stop if d_loss and g_loss do not change for erly_stop times, stop training
         #d_loss_list.pop(0)
         #d_loss_list.append(d_loss.item())
@@ -331,13 +259,13 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
             #break
 
         if (epoch+1) % 1 == 0:
-            sample(generator, name, sample_times=8, save_full=False, save_RGB=True, h=32, w=32, save_dic=f"./experiments/models/visualization/GAN/{epoch+1}")
+            sample(generator, name, sample_times=8, save_full=False, save_RGB=True, h=32, w=32, save_dic=f"./experiments/models/GAN/{epoch+1}")
 
 
 # 加载数据集
 def get_dataloader(name,batch_size,image_size): # b h w c
     if name == 'Indian_Pines_Corrected':
-        dataset = Indian_Pines_Corrected_train(size = image_size)
+        dataset = Indian_Pines_Corrected(size = image_size)
         #(145, 145, 200).[36,17,11]
     elif name == 'KSC_Corrected':
         dataset = KSC_Corrected(size = image_size)
@@ -425,8 +353,8 @@ if __name__ == '__main__':
     paser.add_argument('--datasets', type=str, nargs='+', default=['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected'], help='which datasets, default all')
     paser.add_argument('--batch_size', type=int, default=32, help='size of the batches')
     paser.add_argument('--image_size', type=int, default=32, help='size of the image')
-    paser.add_argument('--epochs', type=int, default=50, help='number of epochs of training')
-    paser.add_argument('--warmup_epoches', type=int, default=8, help='number of warmup epochs of training')
+    paser.add_argument('--epochs', type=int, default=20, help='number of epochs of training')
+    paser.add_argument('--warmup_epoches', type=int, default=0, help='number of warmup epochs of training')
     paser.add_argument('--sample_times', type=int, default=8, help='number of sample times')
     paser.add_argument('--save_checkpoint', type=bool, default=True, help='save checkpoint or not')
     paser.add_argument('--load_checkpoint', type=bool, default=False, help='load checkpoint or not')

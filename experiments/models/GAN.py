@@ -11,8 +11,6 @@ from ldm.data.HSI import *
 import numpy as np
 
 
-from torchvision import models
-net = models.resnet50
 # 定义编解码器
 class ResBlock(nn.Module):
     def __init__(self, dim):
@@ -183,13 +181,14 @@ class Discriminator(nn.Module):
         super(Discriminator, self).__init__()
         self.encoder = Encoder_2(latnet_dim,hidden_dim)
         self.classifier = nn.Sequential(
-            nn.Linear(hidden_dim*h*w, 1),
-            nn.Sigmoid()
+            nn.AdaptiveAvgPool2d((1, 1)),
+            nn.Flatten(),
+            nn.Linear(hidden_dim, 2),
+            nn.Softmax(dim=1)
         )
 
     def forward(self, x):
         x = self.encoder(x)
-        x = rearrange(x, 'b c h w -> b (c h w)')
         x = self.classifier(x)
         return x
 
@@ -203,10 +202,10 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
 
     # 定义损失函数和优化器
     criterion = nn.BCELoss()  # 二分类交叉熵损失函数
-    # optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))  # 生成器的优化器
-    # optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))  # 判别器的优化器
-    optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
-    optimizer_D = optim.SGD(discriminator.parameters(), lr=lr)  # 判别器的优化器
+    optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))  # 生成器的优化器
+    optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))  # 判别器的优化器
+    # optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
+    # optimizer_D = optim.SGD(discriminator.parameters(), lr=lr)  # 判别器的优化器
     #scheduler = optim.lr_scheduler.StepLR(optimizer_D, step_size=30, gamma=0.1) #学习率的调节器
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer_D, T_max=50, eta_min=0.00001)
 
@@ -228,51 +227,63 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
             generator_train_time = 1
             discriminator.eval()
 
-
+        loss_list_d = []
+        loss_list_g = []
 
         for i, input_dic in enumerate(train_loader):
             real_images = input_dic["image"]
             # real_images = torch.tensor(real_images)
             real_images = rearrange(real_images, 'b h w c -> b c h w')
             batch_size = real_images.size(0)
+            fake_labels = torch.stack([torch.zeros(batch_size),torch.ones(batch_size)],dim = 1).to(device) # fake_label [0,1]
+            real_labels = torch.stack([torch.ones(batch_size),torch.zeros(batch_size)],dim = 1).to(device) # real_label [1,0]
 
             # 训练判别器
             for _ in range(discriminator_train_time):
+                generator.eval()
+                discriminator.train()
                 optimizer_D.zero_grad()
                 optimizer_G.zero_grad()
                 real_outputs = discriminator(real_images.to(device)) # 计算真实图像的输出
-                real_loss = criterion(real_outputs, torch.ones_like(real_outputs).to(device)) # real_label 1
+                real_loss = criterion(real_outputs, real_labels)
 
                 z = torch.randn(real_images.shape).to(device) # 生成假图像
                 fake_images = generator(z)
                 fake_outputs = discriminator(fake_images.detach()) # 计算假图像的输出
-                fake_loss = criterion(fake_outputs, torch.zeros_like(fake_outputs).to(device)) #fake_label 0
+                fake_loss = criterion(fake_outputs, fake_labels)
 
                 d_loss = real_loss + fake_loss
                 d_loss.backward()
                 # nn.utils.clip_grad_norm_(parameters=discriminator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
                 optimizer_D.step()
                 # scheduler.step()
+
+                loss_list_d.append(d_loss.item()) # record average loss
                 
-            for _ in range(generator_train_time):
             # 训练生成器
+            for _ in range(generator_train_time):
+                generator.train()
+                discriminator.eval()
                 optimizer_G.zero_grad()
                 optimizer_D.zero_grad()
                 z = torch.randn(real_images.shape).to(device) # 生成假图像
                 fake_images = generator(z)
                 fake_outputs = discriminator(fake_images)
-                g_loss = -1 * criterion(fake_outputs, torch.zeros_like(fake_outputs).to(device))
+                g_loss = 1 * criterion(fake_outputs, fake_labels)
                 # print(g_loss)
                 g_loss.backward()
-                nn.utils.clip_grad_norm_(parameters=generator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
+                nn.utils.clip_grad_norm_(parameters=generator.parameters(), max_norm=0.001, norm_type=2) # 梯度裁剪，避免梯度爆炸
                 optimizer_G.step()
-            if "g_loss" in locals():
-                if (i+1) % int(len(dataloader)/2) == 0: #一轮打印两次
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(dataloader)}], d_loss: {d_loss.item():.4f}, g_loss: {g_loss.item():.4f}")
 
-            else:
-                if (i+1) % int(len(dataloader)/2) == 0: #一轮打印两次
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(dataloader)}], d_loss: {d_loss.item():.4f}")        
+                loss_list_g.append(g_loss.item()) # record average loss
+
+            # peint training information
+            if (i+1) % int(len(train_loader)/2) == 0: #一轮打印两次
+                if "g_loss" in locals():
+                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss: {np.mean(loss_list_d):.4f}, g_loss: {np.mean(loss_list_g):.4f}")
+                else:
+                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss: {np.mean(loss_list_d):.4f}")       
+
         # early stop if d_loss and g_loss do not change for erly_stop times, stop training
         #d_loss_list.pop(0)
         #d_loss_list.append(d_loss.item())
@@ -289,7 +300,7 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
 # 加载数据集
 def get_dataloader(name,batch_size,image_size): # b h w c
     if name == 'Indian_Pines_Corrected':
-        dataset = Indian_Pines_Corrected_train(size = image_size)
+        dataset = Indian_Pines_Corrected(size = image_size)
         #(145, 145, 200).[36,17,11]
     elif name == 'KSC_Corrected':
         dataset = KSC_Corrected(size = image_size)
