@@ -1,66 +1,27 @@
 Args:
 	batch_size: 32
 	checkpoint_dir: ./experiments/metric/checkpoints
-	datasets: ['Indian_Pines_Corrected']
+	datasets: ['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected']
 	embedding_dim: 256
 	epochs: 50
 	hidden_dim: 64
 	image_size: 32
-	layers: 1
+	layers: 16
 	load_checkpoint: False
 	lr: 0.0001
 	save_checkpoint: True
 Start training Indian_Pines_Corrected dataset
-Epoch [1/50], Step [325/325], train_loss: 0.1748, train_acc: 0.5793, valid_loss: 0.1769, valid_acc: 0.5823
-Epoch [2/50], Step [325/325], train_loss: 0.1612, train_acc: 0.6458, valid_loss: 0.1697, valid_acc: 0.6067
-Epoch [3/50], Step [325/325], train_loss: 0.1402, train_acc: 0.6630, valid_loss: 0.1525, valid_acc: 0.6131
-Epoch [4/50], Step [325/325], train_loss: 0.1125, train_acc: 0.7194, valid_loss: 0.1334, valid_acc: 0.6355
-Epoch [5/50], Step [325/325], train_loss: 0.0945, train_acc: 0.7533, valid_loss: 0.1230, valid_acc: 0.6446
-Epoch [6/50], Step [325/325], train_loss: 0.0801, train_acc: 0.7815, valid_loss: 0.1150, valid_acc: 0.6609
-Epoch [7/50], Step [325/325], train_loss: 0.0683, train_acc: 0.8049, valid_loss: 0.1112, valid_acc: 0.6677
-Epoch [8/50], Step [325/325], train_loss: 0.0573, train_acc: 0.8362, valid_loss: 0.1119, valid_acc: 0.6799
-Epoch [9/50], Step [325/325], train_loss: 0.0474, train_acc: 0.8643, valid_loss: 0.1099, valid_acc: 0.6797
-Epoch [10/50], Step [325/325], train_loss: 0.0396, train_acc: 0.8903, valid_loss: 0.1089, valid_acc: 0.6916
-Epoch [11/50], Step [325/325], train_loss: 0.0327, train_acc: 0.9167, valid_loss: 0.1058, valid_acc: 0.7221
-Epoch [12/50], Step [325/325], train_loss: 0.0267, train_acc: 0.9320, valid_loss: 0.1172, valid_acc: 0.7110
-Epoch [13/50], Step [325/325], train_loss: 0.0218, train_acc: 0.9446, valid_loss: 0.1235, valid_acc: 0.7203
-Epoch [14/50], Step [325/325], train_loss: 0.0180, train_acc: 0.9569, valid_loss: 0.1083, valid_acc: 0.7625
-Epoch [15/50], Step [325/325], train_loss: 0.0144, train_acc: 0.9686, valid_loss: 0.1140, valid_acc: 0.7557
-Epoch [16/50], Step [325/325], train_loss: 0.0116, train_acc: 0.9774, valid_loss: 0.1435, valid_acc: 0.7007
-Epoch [17/50], Step [325/325], train_loss: 0.0091, train_acc: 0.9846, valid_loss: 0.1268, valid_acc: 0.7362
-Epoch [18/50], Step [325/325], train_loss: 0.0071, train_acc: 0.9888, valid_loss: 0.1110, valid_acc: 0.7761
-Epoch [19/50], Step [325/325], train_loss: 0.0058, train_acc: 0.9904, valid_loss: 0.1066, valid_acc: 0.7790
-Epoch [20/50], Step [325/325], train_loss: 0.0044, train_acc: 0.9928, valid_loss: 0.1323, valid_acc: 0.7465
-Epoch [21/50], Step [325/325], train_loss: 0.0034, train_acc: 0.9945, valid_loss: 0.1308, valid_acc: 0.7670
-Epoch [22/50], Step [325/325], train_loss: 0.0031, train_acc: 0.9950, valid_loss: 0.1197, valid_acc: 0.7837
-Epoch [23/50], Step [325/325], train_loss: 0.0042, train_acc: 0.9922, valid_loss: 0.1317, valid_acc: 0.7695
-Epoch [24/50], Step [325/325], train_loss: 0.0026, train_acc: 0.9963, valid_loss: 0.1536, valid_acc: 0.7533
-Epoch [25/50], Step [325/325], train_loss: 0.0020, train_acc: 0.9974, valid_loss: 0.1796, valid_acc: 0.7182
-Epoch [26/50], Step [325/325], train_loss: 0.0023, train_acc: 0.9959, valid_loss: 0.1101, valid_acc: 0.8229
-Epoch [27/50], Step [325/325], train_loss: 0.0013, train_acc: 0.9984, valid_loss: 0.1173, valid_acc: 0.8324
-Epoch [28/50], Step [325/325], train_loss: 0.0010, train_acc: 0.9988, valid_loss: 0.2679, valid_acc: 0.6089
-Epoch [29/50], Step [325/325], train_loss: 0.0014, train_acc: 0.9976, valid_loss: 0.1263, valid_acc: 0.8135
-Epoch [30/50], Step [325/325], train_loss: 0.0014, train_acc: 0.9976, valid_loss: 0.1367, valid_acc: 0.8213
-Epoch [31/50], Step [325/325], train_loss: 0.0010, train_acc: 0.9984, valid_loss: 0.1448, valid_acc: 0.8148
-Epoch [32/50], Step [325/325], train_loss: 0.0006, train_acc: 0.9992, valid_loss: 0.1785, valid_acc: 0.7629
-Epoch [33/50], Step [325/325], train_loss: 0.0017, train_acc: 0.9966, valid_loss: 0.1746, valid_acc: 0.7618
-Epoch [34/50], Step [325/325], train_loss: 0.0006, train_acc: 0.9991, valid_loss: 0.1348, valid_acc: 0.8350
-Epoch [35/50], Step [325/325], train_loss: 0.0005, train_acc: 0.9992, valid_loss: 0.1394, valid_acc: 0.8330
-Epoch [36/50], Step [325/325], train_loss: 0.0010, train_acc: 0.9982, valid_loss: 0.1520, valid_acc: 0.8004
-Epoch [37/50], Step [325/325], train_loss: 0.0004, train_acc: 0.9994, valid_loss: 0.1545, valid_acc: 0.8230
-Epoch [38/50], Step [325/325], train_loss: 0.0013, train_acc: 0.9973, valid_loss: 0.1412, valid_acc: 0.8320
-Epoch [39/50], Step [325/325], train_loss: 0.0004, train_acc: 0.9994, valid_loss: 0.1262, valid_acc: 0.8359
-Epoch [40/50], Step [325/325], train_loss: 0.0008, train_acc: 0.9983, valid_loss: 0.2669, valid_acc: 0.6819
-Epoch [41/50], Step [325/325], train_loss: 0.0006, train_acc: 0.9986, valid_loss: 0.1817, valid_acc: 0.7624
-Epoch [42/50], Step [325/325], train_loss: 0.0005, train_acc: 0.9991, valid_loss: 0.1365, valid_acc: 0.8322
-Epoch [43/50], Step [325/325], train_loss: 0.0007, train_acc: 0.9985, valid_loss: 0.1470, valid_acc: 0.8293
-Epoch [44/50], Step [325/325], train_loss: 0.0005, train_acc: 0.9990, valid_loss: 0.1503, valid_acc: 0.8345
-Epoch [45/50], Step [325/325], train_loss: 0.0001, train_acc: 0.9998, valid_loss: 0.1821, valid_acc: 0.8060
-Epoch [46/50], Step [325/325], train_loss: 0.0005, train_acc: 0.9991, valid_loss: 0.1487, valid_acc: 0.8274
-Epoch [47/50], Step [325/325], train_loss: 0.0004, train_acc: 0.9990, valid_loss: 0.1537, valid_acc: 0.8330
-Epoch [48/50], Step [325/325], train_loss: 0.0002, train_acc: 0.9996, valid_loss: 0.1738, valid_acc: 0.8077
-Epoch [49/50], Step [325/325], train_loss: 0.0004, train_acc: 0.9991, valid_loss: 0.1656, valid_acc: 0.8224
-Epoch [50/50], Step [325/325], train_loss: 0.0008, train_acc: 0.9981, valid_loss: 0.1492, valid_acc: 0.8202
-Finish training Indian_Pines_Corrected dataset
-Save checkpoint to ./experiments/metric/checkpoints/classifier/Indian_Pines_Corrected
-finish all datasets
+Epoch [1/50], Step [325/325], train_loss: 0.1084, train_acc: 0.6699, valid_loss: 0.1235, valid_acc: 0.5634
+Epoch [2/50], Step [325/325], train_loss: 0.0421, train_acc: 0.8306, valid_loss: 0.1389, valid_acc: 0.5323
+Epoch [3/50], Step [325/325], train_loss: 0.0236, train_acc: 0.8599, valid_loss: 0.1106, valid_acc: 0.6399
+Epoch [4/50], Step [325/325], train_loss: 0.0160, train_acc: 0.8732, valid_loss: 0.1120, valid_acc: 0.6445
+Epoch [5/50], Step [325/325], train_loss: 0.0129, train_acc: 0.8778, valid_loss: 0.1615, valid_acc: 0.5926
+Epoch [6/50], Step [325/325], train_loss: 0.0108, train_acc: 0.8830, valid_loss: 0.1577, valid_acc: 0.6283
+Epoch [7/50], Step [325/325], train_loss: 0.0103, train_acc: 0.8837, valid_loss: 0.1044, valid_acc: 0.7048
+Epoch [8/50], Step [325/325], train_loss: 0.0098, train_acc: 0.8869, valid_loss: 0.1450, valid_acc: 0.6436
+Epoch [9/50], Step [325/325], train_loss: 0.0097, train_acc: 0.8891, valid_loss: 0.1150, valid_acc: 0.7103
+Epoch [10/50], Step [325/325], train_loss: 0.0093, train_acc: 0.8965, valid_loss: 0.1392, valid_acc: 0.7821
+Epoch [11/50], Step [325/325], train_loss: 0.0084, train_acc: 0.9078, valid_loss: 0.1093, valid_acc: 0.8205
+Epoch [12/50], Step [325/325], train_loss: 0.0087, train_acc: 0.9174, valid_loss: 0.1226, valid_acc: 0.8206
+Epoch [13/50], Step [325/325], train_loss: 0.0083, train_acc: 0.9297, valid_loss: 0.1687, valid_acc: 0.6446
+slurmstepd: error: *** JOB 10971 ON node5 CANCELLED AT 2024-05-26T00:53:20 ***

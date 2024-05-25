@@ -37,9 +37,11 @@ class Classifier(nn.Module):
 
     def forward(self, x):
         x = self.Conv1(x)
+        # x = self.dropout(x)
         x = self.Conv2(x)
         x = self.dropout(x)
         x = self.Conv3(x)
+        x = self.dropout(x)
         x = self.classifier(x)
         return x
 
@@ -52,9 +54,10 @@ def train(classifier, train_loader, valid_loader = None, num_epochs=100, lr = 2e
 
     # 定义损失函数和优化器
     criterion = nn.BCELoss()  # 二分类交叉熵损失函数
-    optimizer = optim.Adam(classifier.parameters(), lr=lr, betas=(0.9, 0.999))  # 生成器的优化器
-    # optimizer = optim.SGD(classifier.parameters(), lr=lr)
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.00001)
+    optimizer = optim.Adam(classifier.parameters(), lr=lr, betas=(0.9, 0.999), weight_decay=1e-4)
+    # optimizer = optim.SGD(classifier.parameters(), lr=lr, momentum=0.9, weight_decay=1e-4)
+    scheduler_step = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0)
+    scheduler_epoch = optim.lr_scheduler.StepLR(optimizer, step_size=int(num_epochs/5), gamma=0.1)
 
 
     # early stop if loss do not change for erly_stop times, stop training
@@ -82,7 +85,6 @@ def train(classifier, train_loader, valid_loader = None, num_epochs=100, lr = 2e
             loss.backward()
             # nn.utils.clip_grad_norm_(parameters=discriminator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
             optimizer.step()
-            scheduler.step()
 
             # record average loss
             prediction = prediction.argmax(dim=1)
@@ -123,7 +125,10 @@ def train(classifier, train_loader, valid_loader = None, num_epochs=100, lr = 2e
                     # record early stop loss
                     loss_list_epoch.pop(0)
                     loss_list_epoch.append(np.mean(loss_list_train))
-                      
+
+            # scheduler_step.step()
+        # scheduler_epoch.step()  
+                  
         # early stop if loss do not change for erly_stop times, stop training
         if np.var(loss_list_epoch)/np.mean(loss_list_epoch) < 1e-8:
             print(f"Early stop at epoch {epoch}")
@@ -229,7 +234,7 @@ if __name__ == '__main__':
         else:
             print(f"Start training {name} dataset")
 
-            classifier = Classifier(get_dim(name), args.embedding_dim, args.hidden_dim, get_label_dim(name))
+            classifier = Classifier(get_dim(name), args.embedding_dim, args.hidden_dim,args.layers, get_label_dim(name))
             train_loader = get_train_loader(name, args.batch_size, args.image_size)
             valid_loader = get_valid_loader(name, args.batch_size, args.image_size)
             train(classifier, train_loader, valid_loader, num_epochs=args.epochs, lr = args.lr)

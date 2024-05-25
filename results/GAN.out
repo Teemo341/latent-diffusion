@@ -1,11 +1,44 @@
 Start training Indian_Pines_Corrected dataset
-Epoch [1/20], Step [203/407], d_loss: 0.1246, g_loss: 6.9968
-Epoch [1/20], Step [406/407], d_loss: 0.0624, g_loss: 8.9454
-Epoch [2/20], Step [203/407], d_loss: 0.0001, g_loss: 12.9162
-Epoch [2/20], Step [406/407], d_loss: 0.0000, g_loss: 12.8432
-Epoch [3/20], Step [203/407], d_loss: 0.0000, g_loss: 14.1755
-Epoch [3/20], Step [406/407], d_loss: 0.0000, g_loss: 14.2003
-Epoch [4/20], Step [203/407], d_loss: 0.0000, g_loss: 15.2321
-Epoch [4/20], Step [406/407], d_loss: 0.0000, g_loss: 16.0545
-Epoch [5/20], Step [203/407], d_loss: 0.0000, g_loss: 17.2480
-Epoch [5/20], Step [406/407], d_loss: 0.0000, g_loss: 18.9304
+Epoch [1/20], Step [203/407], d_loss: 0.0021
+Epoch [1/20], Step [406/407], d_loss: 0.0008
+Epoch [2/20], Step [203/407], d_loss: 0.0005, g_loss: -0.0002
+Epoch [2/20], Step [406/407], d_loss: 0.0002, g_loss: -0.0001
+Epoch [3/20], Step [203/407], d_loss: 0.0008, g_loss: -0.0005
+Epoch [3/20], Step [406/407], d_loss: 0.0009, g_loss: -0.0007
+Epoch [4/20], Step [203/407], d_loss: 0.0005, g_loss: -0.0003
+Epoch [4/20], Step [406/407], d_loss: 0.0003, g_loss: -0.0002
+Epoch [5/20], Step [203/407], d_loss: 0.0002, g_loss: -0.0002
+Epoch [5/20], Step [406/407], d_loss: 0.0001, g_loss: -0.0001
+Epoch [6/20], Step [203/407], d_loss: 0.0001, g_loss: -0.0000
+Epoch [6/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [7/20], Step [203/407], d_loss: 0.0001, g_loss: -0.0001
+Epoch [7/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [8/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [8/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [9/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [9/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [10/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [10/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [11/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [11/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [12/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [12/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [13/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [13/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [14/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [14/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [15/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [15/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [16/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [16/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [17/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [17/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [18/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [18/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [19/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [19/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [20/20], Step [203/407], d_loss: 0.0000, g_loss: -0.0000
+Epoch [20/20], Step [406/407], d_loss: 0.0000, g_loss: -0.0000
+Finish training Indian_Pines_Corrected dataset
+Save checkpoint to ./experiments/models/checkpoints/GAN/Indian_Pines_Corrected
+finish all datasets

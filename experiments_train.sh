@@ -8,4 +8,4 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --gres=gpu:1
 
-python -u -m experiments.models.GAN  --datasets Indian_Pines_Corrected --hidden_dim 32 --layers 8 --epochs 20 --warmup_epoches 0 --lr 1e-4
+python -u -m experiments.models.GAN  --datasets Indian_Pines_Corrected --hidden_dim 32 --layers 8 --epochs 30 --warmup_epoches 3 --lr 1e-2

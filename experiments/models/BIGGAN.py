@@ -133,7 +133,8 @@ class Decoder_2(nn.Module):
             x = layer(x)
         return x
     
-
+#定义中间层结构
+class Midlayer(nn.Mo)
 # 定义生成器的网络结构
 class Generator(nn.Module):
     def __init__(self, latnet_dim, hidden_dim=1):
@@ -175,7 +176,7 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
 
     # 定义损失函数和优化器
     criterion = nn.BCELoss()  # 二分类交叉熵损失函数
-    optimizer_G = optim.Adam(generator.parameters(), lr=1e-5, betas=(0.5, 0.999))  # 生成器的优化器
+    optimizer_G = optim.Adam(generator.parameters(), lr=1e-6, betas=(0.5, 0.999))  # 生成器的优化器
     optimizer_D = optim.Adam(discriminator.parameters(), lr=2e-4, betas=(0.5, 0.999))  # 判别器的优化器
     #scheduler = optim.lr_scheduler.StepLR(optimizer_D, step_size=30, gamma=0.1) #学习率的调节器
 

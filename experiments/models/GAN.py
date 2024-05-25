@@ -17,16 +17,18 @@ class ResBlock(nn.Module):
         super(ResBlock, self).__init__()
         self.conv_bn_relu_1 = nn.Sequential(
             nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(dim),
+            # nn.BatchNorm2d(dim),
+            nn.InstanceNorm2d(dim),
             nn.LeakyReLU(inplace=True)
         )
         self.conv_bn_relu_2 = nn.Sequential(
             nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(dim),
+            # nn.BatchNorm2d(dim),
             nn.LeakyReLU(inplace=True)
         )
         self. conv_3 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
-        self.bn_3 = nn.BatchNorm2d(dim)
+        # self.bn_3 = nn.BatchNorm2d(dim)
+        self.bn_3 = nn.InstanceNorm2d(dim)
         self.relu_3 = nn.LeakyReLU(inplace=True)
  
     def forward(self, x):
@@ -40,13 +42,38 @@ class ResBlock(nn.Module):
 
         return x
 
+class ResBlock_re(nn.Module):
+    def __init__(self, dim):
+        super(ResBlock_re, self).__init__()
+        self.bn_1 = torch.nn.InstanceNorm2d(dim)
+        self.sigmoid_1 = nn.Sigmoid()
+        self.conv_1 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
+
+        self.bn_2 = torch.nn.InstanceNorm2d(dim)
+        self.sigmoid_2 = nn.Sigmoid()
+        self.conv_2 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
+ 
+    def forward(self, x):
+        identity = x
+        x = self.bn_1(x)
+        x = self.sigmoid_1(x)*x
+        x = self.conv_1(x)
+        x = self.bn_2(x)
+        x = self.sigmoid_2(x)*x
+        x = self.conv_2(x)
+        x += identity
+
+        return x
+
+
 class DownBlock(nn.Module): # only downsample the spectral dimension
     def __init__(self, in_channels, out_channels=None):
         super(DownBlock, self).__init__()
         out_channels = out_channels or in_channels//2
         self.conv_relu = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(out_channels),
+            # nn.BatchNorm2d(out_channels),
+            nn.InstanceNorm2d(out_channels),
             nn.LeakyReLU(inplace=True)
         )
  
@@ -54,18 +81,48 @@ class DownBlock(nn.Module): # only downsample the spectral dimension
         x = self.conv_relu(x)
         return x
 
+class DownBlock_re(nn.Module): # only downsample the spectral dimension
+    def __init__(self, in_channels, out_channels=None):
+        super(DownBlock_re, self).__init__()
+        out_channels = out_channels or in_channels//2
+        self.bn = torch.nn.InstanceNorm2d(in_channels)
+        self.sigmoid = nn.Sigmoid()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
+ 
+    def forward(self, x):
+        x = self.bn(x)
+        x = self.sigmoid(x)*x
+        x = self.conv(x)
+        return x
+
+
 class UpBlock(nn.Module): # only upsample the spectral dimension
     def __init__(self, out_channels, in_channels=None):
         super(UpBlock, self).__init__()
         in_channels = in_channels or out_channels//2
         self.conv_relu = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(out_channels),
+            # nn.BatchNorm2d(out_channels),
+            nn.InstanceNorm2d(out_channels),
             nn.LeakyReLU(inplace=True)
         )
  
     def forward(self, x):
         x = self.conv_relu(x)
+        return x
+    
+class UpBlock_re(nn.Module): # only upsample the spectral dimension
+    def __init__(self, out_channels, in_channels=None):
+        super(UpBlock_re, self).__init__()
+        in_channels = in_channels or out_channels//2
+        self.bn = torch.nn.InstanceNorm2d(in_channels)
+        self.sigmoid = nn.Sigmoid()
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
+
+    def forward(self, x):
+        x = self.bn(x)
+        x = self.sigmoid(x)*x
+        x = self.conv(x)
         return x
 
 class Encoder(nn.Module):
@@ -85,6 +142,25 @@ class Encoder(nn.Module):
             layer = self.down[i]
             x = layer(x)
         x = self.resblock1(x)
+        return x
+    
+class Encoder_re(nn.Module):
+    def __init__(self, dim, hidden_dim=8):
+        super(Encoder_re, self).__init__()
+        self.down = nn.ModuleList()
+        i = 0
+        while dim//2 > hidden_dim:
+            self.down.append(DownBlock_re(dim))
+            self.down.append(ResBlock_re(dim//2))
+            dim = dim // 2
+            i = i+1
+            # print(i, dim)
+        self.down.append(DownBlock_re(dim,hidden_dim))
+        self.down.append(ResBlock_re(hidden_dim))
+    def forward(self, x):
+        for i in range(len(self.down)):
+            layer = self.down[i]
+            x = layer(x)
         return x
     
 class Decoder(nn.Module):
@@ -107,68 +183,32 @@ class Decoder(nn.Module):
             x = layer(x)
         return x
 
-class DownBlock_2(nn.Module): # only downsample the spectral dimension
-    def __init__(self, in_channels, out_channels=None):
-        super(DownBlock_2, self).__init__()
-        out_channels = out_channels or in_channels//4
-        self.conv_relu = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
-            nn.LeakyReLU(inplace=True)
-        )
-        self.bn = nn.InstanceNorm2d(out_channels)
- 
-    def forward(self, x):
-        x = self.conv_relu(x)
-        x = self.bn(x)
-        return x
-    
-class Encoder_2(nn.Module):
-    def __init__(self, dim, hidden_dim=16):
-        super(Encoder_2, self).__init__()
-        self.down = nn.ModuleList()
-        i = 0
-        while dim//2 > hidden_dim:
-            self.down.append(DownBlock(dim))
-            dim = dim // 2
-            i = i+1
-            # print(i, dim)
-        self.down.append(DownBlock(dim,hidden_dim))
-        self.resblock1 = ResBlock(hidden_dim)
-    def forward(self, x):
-        for i in range(len(self.down)):
-            layer = self.down[i]
-            x = layer(x)
-        x = self.resblock1(x)
-        return x
-    
-class Decoder_2(nn.Module):
-    def __init__(self, dim, hidden_dim=16):
-        super(Decoder_2, self).__init__()
-        self.resblock1 = ResBlock(hidden_dim)
+class Decoder_re(nn.Module):
+    def __init__(self, dim, hidden_dim=8):
+        super(Decoder_re, self).__init__()
         self.up = nn.ModuleList()
         i = 0
         while dim//2 > hidden_dim:
-            self.up.append(UpBlock(dim))
+            self.up.append(UpBlock_re(dim))
+            self.up.append(ResBlock_re(dim//2))
             dim = dim // 2
             i = i+1
-        self.up.append(UpBlock(dim,hidden_dim))
-
+        self.up.append(UpBlock_re(dim,hidden_dim))
+        self.up.append(ResBlock_re(hidden_dim))
     def forward(self, x):
-        x = self.resblock1(x)
         for i in reversed(range(len(self.up))):
             layer = self.up[i]
-            # print(i, layer.shape, x.shape)
             x = layer(x)
         return x
-    
+
 
 # 定义生成器的网络结构
 class Generator(nn.Module):
     def __init__(self, latnet_dim, hidden_dim=16,layers = 9):
         super(Generator, self).__init__()
-        self.encoder = Encoder_2(latnet_dim,hidden_dim)
+        self.encoder = Encoder(latnet_dim,hidden_dim)
         self.res_block_list = nn.Sequential(*[ResBlock(hidden_dim) for _ in range(layers)])
-        self.decoder = Decoder_2(latnet_dim,hidden_dim)
+        self.decoder = Decoder(latnet_dim,hidden_dim)
     def forward(self, x):
         x = self.encoder(x)
         x = self.res_block_list(x)
@@ -179,7 +219,8 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self,latnet_dim, hidden_dim=16, h =32, w =32):
         super(Discriminator, self).__init__()
-        self.encoder = Encoder_2(latnet_dim,hidden_dim)
+        self.encoder = Encoder(latnet_dim,hidden_dim)
+        self.drop = nn.Dropout(0.5)
         self.classifier = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
             nn.Flatten(),
@@ -189,6 +230,7 @@ class Discriminator(nn.Module):
 
     def forward(self, x):
         x = self.encoder(x)
+        x = self.drop(x)
         x = self.classifier(x)
         return x
 
@@ -202,12 +244,14 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
 
     # 定义损失函数和优化器
     criterion = nn.BCELoss()  # 二分类交叉熵损失函数
-    optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))  # 生成器的优化器
-    optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))  # 判别器的优化器
-    # optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
-    # optimizer_D = optim.SGD(discriminator.parameters(), lr=lr)  # 判别器的优化器
-    #scheduler = optim.lr_scheduler.StepLR(optimizer_D, step_size=30, gamma=0.1) #学习率的调节器
-    scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer_D, T_max=50, eta_min=0.00001)
+    # optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))  # 生成器的优化器
+    # optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))  # 判别器的优化器
+    optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
+    optimizer_D = optim.SGD(discriminator.parameters(), lr=lr)  # 判别器的优化器
+    scheduler_D = optim.lr_scheduler.StepLR(optimizer_D, step_size=3, gamma=0.1) #学习率的调节器
+    scheduler_G = optim.lr_scheduler.StepLR(optimizer_G, step_size=3, gamma=0.1) #学习率的调节器
+    # scheduler_D = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer_D, T_0=50, T_mult=2)
+    # scheduler_G = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer_G, T_0=50, T_mult=2)
 
     # early stop if d_loss and g_loss do not change for erly_stop times, stop training
     d_loss_list = g_loss_list = []
@@ -225,15 +269,16 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
         else:
             discriminator_train_time = 1
             generator_train_time = 1
-            discriminator.eval()
 
-        loss_list_d = []
+        loss_list_d_real = []
+        loss_list_d_fake = []
         loss_list_g = []
 
         for i, input_dic in enumerate(train_loader):
             real_images = input_dic["image"]
             # real_images = torch.tensor(real_images)
             real_images = rearrange(real_images, 'b h w c -> b c h w')
+            z = torch.randn(real_images.shape).to(device) # 生成随机噪声
             batch_size = real_images.size(0)
             fake_labels = torch.stack([torch.zeros(batch_size),torch.ones(batch_size)],dim = 1).to(device) # fake_label [0,1]
             real_labels = torch.stack([torch.ones(batch_size),torch.zeros(batch_size)],dim = 1).to(device) # real_label [1,0]
@@ -249,16 +294,16 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
 
                 z = torch.randn(real_images.shape).to(device) # 生成假图像
                 fake_images = generator(z)
-                fake_outputs = discriminator(fake_images.detach()) # 计算假图像的输出
+                fake_outputs = discriminator(fake_images) # 计算假图像的输出
                 fake_loss = criterion(fake_outputs, fake_labels)
 
                 d_loss = real_loss + fake_loss
                 d_loss.backward()
                 # nn.utils.clip_grad_norm_(parameters=discriminator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
                 optimizer_D.step()
-                # scheduler.step()
 
-                loss_list_d.append(d_loss.item()) # record average loss
+                loss_list_d_real.append(real_loss.item()) # record average loss
+                loss_list_d_fake.append(fake_loss.item()) # record average loss
                 
             # 训练生成器
             for _ in range(generator_train_time):
@@ -267,12 +312,13 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
                 optimizer_G.zero_grad()
                 optimizer_D.zero_grad()
                 z = torch.randn(real_images.shape).to(device) # 生成假图像
+                # print(fake_images == generator(z))
                 fake_images = generator(z)
                 fake_outputs = discriminator(fake_images)
-                g_loss = 1 * criterion(fake_outputs, fake_labels)
+                g_loss = criterion(fake_outputs, real_labels)
                 # print(g_loss)
                 g_loss.backward()
-                nn.utils.clip_grad_norm_(parameters=generator.parameters(), max_norm=0.001, norm_type=2) # 梯度裁剪，避免梯度爆炸
+                # nn.utils.clip_grad_norm_(parameters=generator.parameters(), max_norm=0.01, norm_type=2) # 梯度裁剪，避免梯度爆炸
                 optimizer_G.step()
 
                 loss_list_g.append(g_loss.item()) # record average loss
@@ -280,9 +326,9 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
             # peint training information
             if (i+1) % int(len(train_loader)/2) == 0: #一轮打印两次
                 if "g_loss" in locals():
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss: {np.mean(loss_list_d):.4f}, g_loss: {np.mean(loss_list_g):.4f}")
+                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss_real: {np.mean(loss_list_d_real):.4f}, d_loss_fake: {np.mean(loss_list_d_fake):.4f}, g_loss: {np.mean(loss_list_g):.4f}")
                 else:
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss: {np.mean(loss_list_d):.4f}")       
+                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], d_loss_real: {np.mean(loss_list_d_real):.4f}, d_loss_fake: {np.mean(loss_list_d_fake):.4f}")       
 
         # early stop if d_loss and g_loss do not change for erly_stop times, stop training
         #d_loss_list.pop(0)
@@ -292,6 +338,10 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
         #if np.var(d_loss_list)/np.mean(d_loss_list) < 0.0001 and np.var(g_loss_list)/np.mean(g_loss_list) < 0.0001:
             #print(f"Early stop at epoch {epoch}")
             #break
+
+        if epoch >= warmup_epoches:
+            scheduler_D.step()
+            scheduler_G.step()
 
         if (epoch+1) % 1 == 0:
             sample(generator, name, sample_times=4, save_full=False, save_RGB=True, h=32, w=32, save_dic=f"./experiments/models/visualization/GAN/{epoch+1}")
@@ -361,6 +411,7 @@ def sample(generator, name, sample_times=8, save_full = True, save_RGB = True, h
         os.makedirs(save_dic)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     generator.to(device)
+    generator.eval()
 
     with torch.no_grad():
         z = torch.randn(sample_times, get_dim(name), h, w).to(device)
