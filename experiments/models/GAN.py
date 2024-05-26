@@ -244,10 +244,10 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
 
     # 定义损失函数和优化器
     criterion = nn.BCELoss()  # 二分类交叉熵损失函数
-    # optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))  # 生成器的优化器
-    # optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))  # 判别器的优化器
-    optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
-    optimizer_D = optim.SGD(discriminator.parameters(), lr=lr)  # 判别器的优化器
+    optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.9, 0.999))  # 生成器的优化器
+    optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.9, 0.999))  # 判别器的优化器
+    # optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
+    # optimizer_D = optim.SGD(discriminator.parameters(), lr=lr)  # 判别器的优化器
     scheduler_D = optim.lr_scheduler.StepLR(optimizer_D, step_size=3, gamma=0.1) #学习率的调节器
     scheduler_G = optim.lr_scheduler.StepLR(optimizer_G, step_size=3, gamma=0.1) #学习率的调节器
     # scheduler_D = optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer_D, T_0=50, T_mult=2)
@@ -339,9 +339,9 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
             #print(f"Early stop at epoch {epoch}")
             #break
 
-        if epoch >= warmup_epoches:
-            scheduler_D.step()
-            scheduler_G.step()
+        # if epoch >= warmup_epoches:
+        #     scheduler_D.step()
+        #     scheduler_G.step()
 
         if (epoch+1) % 1 == 0:
             sample(generator, name, sample_times=4, save_full=False, save_RGB=True, h=32, w=32, save_dic=f"./experiments/models/visualization/GAN/{epoch+1}")
