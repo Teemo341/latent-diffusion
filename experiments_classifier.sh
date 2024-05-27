@@ -8,4 +8,4 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --gres=gpu:1
 
-python -u -m experiments.metric.classifier --embedding_dim 256 --hidden_dim 64 --layers 16 --epochs 50 --lr 1e-4
+python -u -m experiments.metric.classifier --dataset PaviaU --embedding_dim 256 --hidden_dim 64 --layers 16 --epochs 50 --lr 1e-4

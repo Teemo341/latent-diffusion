@@ -134,7 +134,8 @@ class Decoder_2(nn.Module):
         return x
     
 #定义中间层结构
-class Midlayer(nn.Mo)
+class Midlayer(nn.Module)：
+    def __in
 # 定义生成器的网络结构
 class Generator(nn.Module):
     def __init__(self, latnet_dim, hidden_dim=1):

@@ -14,7 +14,7 @@ import numpy as np
 # 加载数据集
 def get_whole_image(name): # b h w c
     if name == 'Indian_Pines_Corrected':
-        dataset = Indian_Pines_Corrected_train()
+        dataset = Indian_Pines_Corrected()
         #(145, 145, 200).[36,17,11]
     elif name == 'KSC_Corrected':
         dataset = KSC_Corrected()

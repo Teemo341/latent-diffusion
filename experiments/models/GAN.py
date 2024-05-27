@@ -243,9 +243,9 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
     discriminator.to(device)
 
     # 定义损失函数和优化器
-    criterion = nn.BCELoss()  # 二分类交叉熵损失函数
-    optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.9, 0.999))  # 生成器的优化器
-    optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.9, 0.999))  # 判别器的优化器
+    criterion = nn.CrossEntropyLoss()  # 二分类交叉熵损失函数
+    optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))  # 生成器的优化器
+    optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))  # 判别器的优化器
     # optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
     # optimizer_D = optim.SGD(discriminator.parameters(), lr=lr)  # 判别器的优化器
     scheduler_D = optim.lr_scheduler.StepLR(optimizer_D, step_size=3, gamma=0.1) #学习率的调节器
@@ -464,8 +464,10 @@ if __name__ == '__main__':
                 os.makedirs(checkpoint_dir)
 
         if args.load_checkpoint:
-            generator = torch.load(torch.load(f"{checkpoint_dir}/generator.pth"))
-            discriminator = torch.load(torch.load(f"{checkpoint_dir}/discriminator.pth"))
+            generator = Generator(get_dim(name), args.hidden_dim, args.layers)
+            discriminator = Discriminator(get_dim(name))
+            generator.load_state_dict(torch.load(f"{checkpoint_dir}/generator.pth"))
+            discriminator.load_state_dict(torch.load(f"{checkpoint_dir}/discriminator.pth"))
             print(f"Load checkpoint from {checkpoint_dir}")
         else:
             print(f"Start training {name} dataset")

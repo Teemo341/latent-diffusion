@@ -251,8 +251,9 @@ if __name__ == '__main__':
                 os.makedirs(checkpoint_dir)
 
         if args.load_checkpoint:
-            classifier = torch.load(torch.load(
-                f"{checkpoint_dir}/classifier.pth"))
+            classifier = Classifier(get_dim(
+                name), args.embedding_dim, args.hidden_dim, args.layers, get_label_dim(name))
+            classifier.load_state_dict(torch.load(f"{checkpoint_dir}/classifier.pth"))
             print(f"Load checkpoint from {checkpoint_dir}")
         else:
             print(f"Start training {name} dataset")
