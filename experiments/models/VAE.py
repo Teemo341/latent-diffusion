@@ -18,7 +18,7 @@ class ResidualBlock(nn.Module):
         super(ResidualBlock, self).__init__()
         self.conv1 = nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1)
         self.bn1 = nn.BatchNorm2d(in_channels)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.LeakyReLU(0.2)
         self.conv2 = nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1)
         self.bn2 = nn.BatchNorm2d(in_channels)
 
@@ -38,15 +38,15 @@ class ConvVAE(nn.Module):
         self.encoder = nn.Sequential(
             nn.Conv2d(200, 128, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(0.2),
             ResidualBlock(128),
             nn.Conv2d(128, 64, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(0.2),
             ResidualBlock(64),
             nn.Conv2d(64, 32, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(32),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(0.2),
             ResidualBlock(32)
         )
         self.fc1 = nn.Linear(32 * (self.H // 8) * (self.W // 8), 256)
@@ -58,20 +58,20 @@ class ConvVAE(nn.Module):
         self.decoder = nn.Sequential(
             nn.ConvTranspose2d(32, 64, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(64),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(0.2),
             nn.ConvTranspose2d(64, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(0.2),
             nn.ConvTranspose2d(128, 200, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(200),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(0.2),
             nn.Tanh()
         )
 
     def encode(self, x):
         h = self.encoder(x)
         h = h.reshape(-1, 32 * (self.H // 8) * (self.W // 8))
-        h = F.relu(self.fc1(h))
+        h = F.leaky_relu(self.fc1(h))
         return self.fc21(h), self.fc22(h)
 
     def reparameterize(self, mu, logvar):
@@ -80,7 +80,7 @@ class ConvVAE(nn.Module):
         return mu + eps * std
 
     def decode(self, z):
-        h = F.relu(self.decoder_fc(z))
+        h = F.leaky_relu(self.decoder_fc(z))
         h = h.reshape(-1, 32, self.H // 8, self.W // 8)
         return self.decoder(h)
 
@@ -90,22 +90,21 @@ class ConvVAE(nn.Module):
         return self.decode(z), mu, logvar
 
 def loss_function(recon_x, x, mu, logvar):
-    BCE = F.mse_loss(recon_x, x, reduction='mean')
-    epsilon = 1e-8  
-    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - (logvar.exp() + epsilon).log())
-    return BCE + KLD
-
+    BCE = F.mse_loss(recon_x, x, reduction='sum') 
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - (logvar.exp()))
+    return BCE, KLD
 
 
 # 定义训练函数
 def train(model, train_loader, num_epochs=10):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    model.train()
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.004)
 
     for epoch in range(num_epochs):
-        total_loss = 0
+        model.train()
+        total_lossmse = 0
+        total_losskl = 0
         for i, input_dic in enumerate(train_loader):
             data = input_dic["image"].to(device)
             # real_images = torch.tensor(real_images)
@@ -115,16 +114,18 @@ def train(model, train_loader, num_epochs=10):
             recon_batch, mu, logvar = model(data)
             # 计算损失
             # print(data.min())
-            loss = loss_function(recon_batch, data, mu, logvar)
+            loss_BCE, loss_KLD = loss_function(recon_batch, data, mu, logvar)
+            loss = loss_KLD + loss_BCE
             # 反向传播
             loss.backward()
             optimizer.step()
             
-            total_loss += loss.item()      
+            total_lossmse += loss_BCE.item()     
+            total_losskl += loss_KLD.item()
         # 日志输出
-        print(f'Epoch {epoch+1}, Average Loss: {total_loss / len(train_loader.dataset):.4f}')
+        print(f'Epoch {epoch+1}, MSE Loss: {total_lossmse / len(train_loader.dataset):.4f}, KL Loss: {total_losskl / len(train_loader.dataset):.4f}')
 
-        if (epoch+1) % 1 == 0:
+        if (epoch+1) % 5 == 0:
             sample(model, name, sample_times=8, save_full=False, save_RGB=True, save_dic=f"./experiments/models/VAE/{epoch+1}")
 # 生成图像
 
@@ -195,6 +196,7 @@ def sample(model, name, sample_times=8, save_full = True, save_RGB = True, save_
         os.makedirs(save_dic)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
+    model.eval()
 
     with torch.no_grad():
         z = torch.randn(sample_times, 20).to(device)
@@ -220,9 +222,9 @@ def sample(model, name, sample_times=8, save_full = True, save_RGB = True, save_
 if __name__ == '__main__':
     paser = argparse.ArgumentParser()
     paser.add_argument('--datasets', type=str, nargs='+', default=['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected'], help='which datasets, default all')
-    paser.add_argument('--batch_size', type=int, default=32, help='size of the batches')
+    paser.add_argument('--batch_size', type=int, default=20, help='size of the batches')
     paser.add_argument('--image_size', type=int, default=32, help='size of the image')
-    paser.add_argument('--epochs', type=int, default=100, help='number of epochs of training')
+    paser.add_argument('--epochs', type=int, default=200, help='number of epochs of training')
     paser.add_argument('--warmup_epoches', type=int, default=0, help='number of warmup epochs of training')
     paser.add_argument('--sample_times', type=int, default=8, help='number of sample times')
     paser.add_argument('--save_checkpoint', type=bool, default=True, help='save checkpoint or not')

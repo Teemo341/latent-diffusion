@@ -165,31 +165,48 @@ def spectral_curve_visualization(HSI,save_path=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--algorithm", type=str, default="GAN")
-    parser.add_argument("--dataset", type=str, default="Indian_Pines_Corrected")
+    parser.add_argument("--algorithms", type=str, nargs = '+', default=["GAN","HUD","VAE","MSCNN"])
+    parser.add_argument("--datasets", type=str, nargs= '+', default=["Indian_Pines_Corrected", "KSC_Corrected", "Pavia", "PaviaU", "Salinas_Corrected"])
     parser.add_argument("--sample_times", type=int, default=8)
     parser.add_argument("--metric", type=str, nargs='+', default=["IS", "FID", "F_p", "D_b", "spectral_curve"])
     args = parser.parse_args()
 
 
-    classifier = load_classifier(args.dataset)
-    sampled_images = load_sampled_HSIs(args.algorithm, args.dataset, args.sample_times)
-    original_image = load_original_HSI(args.dataset)
+    for dataset in args.datasets:
+        original_image = load_original_HSI(args.dataset)
+        classifier = load_classifier(args.dataset)
 
-    if "IS" in args.metric:
-        IS = inception_score(classifier, sampled_images)
-        print(f"Inception Score: {IS}")
-    if "FID" in args.metric:
-        FID = Frechet_Inception_Distance(classifier, sampled_images, original_image)
-        print(f"Frechet Inception Distance: {FID}")
-    if "F_p" in args.metric:
-        F_p = point_fidelity(sampled_images, original_image)
-        print(f"Point Fidelity: {F_p}")
-    if "D_b" in args.metric:
-        D_b = block_diversity(sampled_images, original_image)
-        print(f"Block Diversity: {D_b}")
-    if "spectral_curve" in args.metric:
-        spectral_curve_visualization(original_image)
-        print("spectral curve saved")
+        for algorithm in args.algorithms:
+            sampled_images = load_sampled_HSIs(algorithm, dataset, args.sample_times)
+
+            IS = FID = F_p = D_b = None
+
+            if "IS" in args.metric:
+                IS = inception_score(classifier, sampled_images)
+                print(f"Inception Score: {IS}")
+            if "FID" in args.metric:
+                FID = Frechet_Inception_Distance(classifier, sampled_images, original_image)
+                print(f"Frechet Inception Distance: {FID}")
+            if "F_p" in args.metric:
+                F_p = point_fidelity(sampled_images, original_image)
+                print(f"Point Fidelity: {F_p}")
+            if "D_b" in args.metric:
+                D_b = block_diversity(sampled_images, original_image)
+                print(f"Block Diversity: {D_b}")
+            if "spectral_curve" in args.metric:
+                spectral_curve_visualization(original_image, f'./experiments/metric/original_image/{dataset}')
+                sampled_images_ = np.array(sampled_images)
+                sampled_images_ = rearrange(sampled_images_, 'b h w c -> (b h) w c')
+                spectral_curve_visualization(sampled_images_, f'./experiments/metric/{algorithm}/{dataset}')
+                print("spectral curve saved")
+            
+            txt_path = f'./experiments/metric/{algorithm}/{dataset}'
+            if not os.path.exists(txt_path):
+                os.makedirs(txt_path)
+            with open(f'{txt_path}/metric.txt','w') as f:
+                f.write(f"IS: {IS}\n")
+                f.write(f"FID: {FID}\n")
+                f.write(f"F_p: {F_p}\n")
+                f.write(f"D_b: {D_b}\n")
 
     print("finished")

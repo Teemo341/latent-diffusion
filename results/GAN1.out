@@ -1,0 +1,27 @@
+Start training Indian_Pines_Corrected dataset
+Epoch [1/20], Step [203/407], d_loss: 0.0001, g_loss: 0.0005
+Epoch [1/20], Step [406/407], d_loss: 0.0001, g_loss: 0.0002
+Traceback (most recent call last):
+  File "/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/runpy.py", line 194, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/data_ssy/latent-diffusion/experiments/models/BIGGAN.py", line 260, in <module>
+    train(generator, discriminator, dataloader, num_epochs=args.epochs, warmup_epoches=args.warmup_epoches)
+  File "/data_ssy/latent-diffusion/experiments/models/BIGGAN.py", line 137, in train
+    sample(generator, name, sample_times=8, save_full=False, save_RGB=True, h=32, w=32, save_dic=f"./experiments/models/GAN1/{epoch+1}")
+  File "/data_ssy/latent-diffusion/experiments/models/BIGGAN.py", line 207, in sample
+    generated_images = generator(z).cpu()
+  File "/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/data_ssy/latent-diffusion/experiments/models/BIGGAN.py", line 57, in forward
+    return self.gen(x)
+  File "/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/site-packages/torch/nn/modules/container.py", line 217, in forward
+    input = module(input)
+  File "/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/site-packages/torch/nn/modules/module.py", line 1501, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/site-packages/torch/nn/modules/activation.py", line 359, in forward
+    return torch.tanh(input)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 12.50 GiB (GPU 0; 23.65 GiB total capacity; 12.71 GiB already allocated; 4.79 GiB free; 17.39 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF

@@ -136,7 +136,7 @@ class Encoder(nn.Module):
             i = i+1
             # print(i, dim)
         self.down.append(DownBlock(dim,hidden_dim))
-        self.resblock1 = ResBlock(hidden_dim)
+        self.resblock1 = nn.Conv2d(hidden_dim, hidden_dim, kernel_size=3, stride=1, padding=1)
     def forward(self, x):
         for i in range(len(self.down)):
             layer = self.down[i]
@@ -157,16 +157,18 @@ class Encoder_re(nn.Module):
             # print(i, dim)
         self.down.append(DownBlock_re(dim,hidden_dim))
         self.down.append(ResBlock_re(hidden_dim))
+        self.resblock1 = nn.Conv2d(hidden_dim, hidden_dim, kernel_size=3, stride=1, padding=1)
     def forward(self, x):
         for i in range(len(self.down)):
             layer = self.down[i]
             x = layer(x)
+        x = self.resblock1(x)
         return x
     
 class Decoder(nn.Module):
     def __init__(self, dim, hidden_dim=8):
         super(Decoder, self).__init__()
-        self.resblock1 = ResBlock(hidden_dim)
+        self.resblock2 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
         self.up = nn.ModuleList()
         i = 0
         while dim//2 > hidden_dim:
@@ -176,16 +178,17 @@ class Decoder(nn.Module):
         self.up.append(UpBlock(dim,hidden_dim))
 
     def forward(self, x):
-        x = self.resblock1(x)
         for i in reversed(range(len(self.up))):
             layer = self.up[i]
             # print(i, layer.shape, x.shape)
             x = layer(x)
+        x = self.resblock2(x)
         return x
 
 class Decoder_re(nn.Module):
     def __init__(self, dim, hidden_dim=8):
         super(Decoder_re, self).__init__()
+        self.resblock2 = nn.Conv2d(dim, dim, kernel_size=3, stride=1, padding=1)
         self.up = nn.ModuleList()
         i = 0
         while dim//2 > hidden_dim:
@@ -199,6 +202,7 @@ class Decoder_re(nn.Module):
         for i in reversed(range(len(self.up))):
             layer = self.up[i]
             x = layer(x)
+        x = self.resblock2(x)
         return x
 
 
@@ -206,9 +210,9 @@ class Decoder_re(nn.Module):
 class Generator(nn.Module):
     def __init__(self, latnet_dim, hidden_dim=16,layers = 9):
         super(Generator, self).__init__()
-        self.encoder = Encoder(latnet_dim,hidden_dim)
-        self.res_block_list = nn.Sequential(*[ResBlock(hidden_dim) for _ in range(layers)])
-        self.decoder = Decoder(latnet_dim,hidden_dim)
+        self.encoder = Encoder_re(latnet_dim,hidden_dim)
+        self.res_block_list = nn.Sequential(*[ResBlock_re(hidden_dim) for _ in range(layers)])
+        self.decoder = Decoder_re(latnet_dim,hidden_dim)
     def forward(self, x):
         x = self.encoder(x)
         x = self.res_block_list(x)
@@ -219,7 +223,7 @@ class Generator(nn.Module):
 class Discriminator(nn.Module):
     def __init__(self,latnet_dim, hidden_dim=16, h =32, w =32):
         super(Discriminator, self).__init__()
-        self.encoder = Encoder(latnet_dim,hidden_dim)
+        self.encoder = Encoder_re(latnet_dim,hidden_dim)
         self.drop = nn.Dropout(0.5)
         self.classifier = nn.Sequential(
             nn.AdaptiveAvgPool2d((1, 1)),
@@ -243,7 +247,7 @@ def train(generator, discriminator, train_loader, valid_loader = None, num_epoch
     discriminator.to(device)
 
     # 定义损失函数和优化器
-    criterion = nn.CrossEntropyLoss()  # 二分类交叉熵损失函数
+    criterion = nn.CrossEntropyLoss(reduction='sum')  # 二分类交叉熵损失函数
     optimizer_G = optim.Adam(generator.parameters(), lr=lr, betas=(0.5, 0.999))  # 生成器的优化器
     optimizer_D = optim.Adam(discriminator.parameters(), lr=lr, betas=(0.5, 0.999))  # 判别器的优化器
     # optimizer_G = optim.SGD(generator.parameters(), lr=lr)  # 生成器的优化器
