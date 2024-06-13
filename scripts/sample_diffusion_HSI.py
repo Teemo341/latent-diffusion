@@ -4,35 +4,17 @@ import time
 import numpy as np
 from tqdm import trange
 
-from scipy.io import loadmat,savemat
 from omegaconf import OmegaConf
 from PIL import Image
+import matplotlib.pyplot as plt
 
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.util import instantiate_from_config
 
 rescale = lambda x: (x + 1.) / 2.
 
-def custom_to_pil_HSI(x):
+def custom_to_pil(x):
     x = x.detach().cpu()
-    x = torch.clamp(x, -1., 1.)
-    x = (x + 1.) / 2.
-    x = x.permute(1, 2, 0).numpy()
-    x = (255 * x).astype(np.uint8)
-    return x
-
-
-def custom_to_np_HSI(x):
-    # saves the batch in adm style as in https://github.com/openai/guided-diffusion/blob/main/scripts/image_sample.py
-    sample = x.detach().cpu()
-    sample = ((sample + 1) * 127.5).clamp(0, 255).to(torch.uint8)
-    sample = sample.permute(0, 2, 3, 1)
-    sample = sample.contiguous()
-    return sample
-
-
-def custom_to_pil(x,visual_channels= [1,2,3]):
-    x = x[visual_channels,:,:].detach().cpu()
     x = torch.clamp(x, -1., 1.)
     x = (x + 1.) / 2.
     x = x.permute(1, 2, 0).numpy()
@@ -43,13 +25,35 @@ def custom_to_pil(x,visual_channels= [1,2,3]):
     return x
 
 
-def custom_to_np(x,visual_channels= [1,2,3]):
+def custom_to_np(x):
     # saves the batch in adm style as in https://github.com/openai/guided-diffusion/blob/main/scripts/image_sample.py
-    sample = x[:,visual_channels,:,:].detach().cpu()
+    sample = x.detach().cpu()
     sample = ((sample + 1) * 127.5).clamp(0, 255).to(torch.uint8)
     sample = sample.permute(0, 2, 3, 1)
     sample = sample.contiguous()
     return sample
+
+class HSI_visualization():
+    def __init__(self, name):
+        super(HSI_visualization, self).__init__()
+        if name == 'Indian_Pines_Corrected':
+            self.vis_channels = [36,17,11]
+        elif name == 'KSC_Corrected':
+            self.vis_channels = [28,9,10]
+        elif name == "Pavia":
+            self.vis_channels =[46,27,10]
+        elif name == "PaviaU":
+            self.vis_channels =[46,27,10]
+        elif name == "Salinas_Corrected":
+            self.vis_channels =[36,17,11]
+        else:
+            raise ValueError("Unsupported dataset")
+
+    def visualization(self, HSI_image):
+        RGB_image = HSI_image[:,:,self.vis_channels]
+        RGB_image = (RGB_image+1.0)/2.0 # 将数据归一化到[0,1]
+        RGB_image = (np.array(RGB_image) * 255).astype(np.uint8)
+        return RGB_image
 
 
 def logs2pil(logs, keys=["sample"]):
@@ -124,7 +128,7 @@ def make_convolutional_sample(model, batch_size, vanilla=False, custom_steps=Non
     print(f'Throughput for this batch: {log["throughput"]}')
     return log
 
-def run(model, logdir, visual_channels=[69, 27, 11], batch_size=50, vanilla=False, custom_steps=None, eta=None, n_samples=50000, nplog=None):
+def run(dataset, model, logdir, batch_size=50, vanilla=False, custom_steps=None, eta=None, n_samples=50000, nplog=None):
     if vanilla:
         print(f'Using Vanilla DDPM sampling with {model.num_timesteps} sampling steps.')
     else:
@@ -132,26 +136,20 @@ def run(model, logdir, visual_channels=[69, 27, 11], batch_size=50, vanilla=Fals
 
 
     tstart = time.time()
-    n_saved = len(glob.glob(os.path.join(logdir,'*.png')))-1
+    # n_saved = len(glob.glob(os.path.join(logdir,'*.png')))-1
+    n_saved = 0
     # path = logdir
     if model.cond_stage_model is None:
-        all_images = []
 
         print(f"Running unconditional sampling for {n_samples} samples")
         for _ in trange(n_samples // batch_size, desc="Sampling Batches (unconditional)"):
             logs = make_convolutional_sample(model, batch_size=batch_size,
                                              vanilla=vanilla, custom_steps=custom_steps,
                                              eta=eta)
-            n_saved = save_logs(logs, logdir, visual_channels, n_saved=n_saved, key="sample")
-            all_images.extend([custom_to_np(logs["sample"])])
+            n_saved = save_logs(dataset, logs, logdir, n_saved=n_saved, key="sample")
             if n_saved >= n_samples:
                 print(f'Finish after generating {n_saved} samples')
                 break
-        all_img = np.concatenate(all_images, axis=0)
-        all_img = all_img[:n_samples]
-        shape_str = "x".join([str(x) for x in all_img.shape])
-        nppath = os.path.join(nplog, f"{shape_str}-samples.npz")
-        np.savez(nppath, all_img)
 
     else:
        raise NotImplementedError('Currently only sampling for unconditional models supported.')
@@ -159,30 +157,43 @@ def run(model, logdir, visual_channels=[69, 27, 11], batch_size=50, vanilla=Fals
     print(f"sampling of {n_saved} images finished in {(time.time() - tstart) / 60.:.2f} minutes.")
 
 
-def save_logs(logs, path, visual_channels=[69, 27, 11], n_saved=0, key="sample", np_path=None):
+def save_logs(dataset, logs, path, n_saved=0, key="sample"):
+    vis = HSI_visualization(dataset)
     for k in logs:
         if k == key:
             batch = logs[key]
-            if np_path is None:
-                for x in batch:
-                    img = custom_to_pil(x,visual_channels)
-                    img_HSI = custom_to_pil_HSI(x)
-                    imgpath = os.path.join(path, f"{key}_{n_saved:06}.png")
-                    imgpath_HSI = os.path.join(path, f"{key}_{n_saved:06}.mat")
-                    img.save(imgpath)
-                    savemat(imgpath_HSI,img_HSI)
-                    n_saved += 1
-            else:
-                npbatch = custom_to_np_HSI(batch)
-                shape_str = "x".join([str(x) for x in npbatch.shape])
-                nppath = os.path.join(np_path, f"{n_saved}-{shape_str}-samples.npz")
-                np.savez(nppath, npbatch)
-                n_saved += npbatch.shape[0]
+            for x in batch:
+
+                x = x.detach().cpu()
+                x = torch.clamp(x, -1., 1.)
+                x = x.permute(1, 2, 0).numpy() # h w c
+                
+                #save HSI:
+                np.save(os.path.join(path, f"generated_{n_saved}.npy"), x)
+
+                # save RGB:
+                img = vis.visualization(x)
+                # img = Image.fromarray(img)
+                # if not img.mode == "RGB":
+                #     img = img.convert("RGB")
+                # img.save(os.path.join(path, f"generated_{n_saved}.png"))
+                plt.imshow(img)
+                plt.axis('off')
+                plt.savefig(os.path.join(path, f"generated_{n_saved}.png"),dpi=100,bbox_inches='tight',pad_inches = 0)
+
+                n_saved += 1
     return n_saved
 
 
 def get_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-d",
+        "--dataset",
+        type=str,
+        nargs="?",
+        help="load from logdir or checkpoint in logdir",
+    )
     parser.add_argument(
         "-r",
         "--resume",
@@ -236,11 +247,6 @@ def get_parser():
         help="the bs",
         default=10
     )
-    parser.add_argument(
-        '--visual_channels', 
-        nargs='+', 
-        type=int
-    )
     return parser
 
 
@@ -275,6 +281,7 @@ if __name__ == "__main__":
     opt, unknown = parser.parse_known_args()
     ckpt = None
 
+    opt.resume = f'{opt.resume}/{opt.dataset}'
     if not os.path.exists(opt.resume):
         raise ValueError("Cannot find {}".format(opt.resume))
     if os.path.isfile(opt.resume):
@@ -315,12 +322,13 @@ if __name__ == "__main__":
     print(f"global step: {global_step}")
     print(75 * "=")
     print("logging to:")
-    logdir = os.path.join(logdir, "samples", f"{global_step:08}", now)
-    imglogdir = os.path.join(logdir, "img")
-    numpylogdir = os.path.join(logdir, "numpy")
+    # logdir = os.path.join(logdir, "samples", f"{global_step:08}", now)
+    # imglogdir = os.path.join(logdir, "img")
+    # numpylogdir = os.path.join(logdir, "numpy")
 
-    os.makedirs(imglogdir)
-    os.makedirs(numpylogdir)
+    os.makedirs(logdir, exist_ok=True)
+    # os.makedirs(imglogdir)
+    # os.makedirs(numpylogdir)
     print(logdir)
     print(75 * "=")
 
@@ -333,8 +341,8 @@ if __name__ == "__main__":
     print(sampling_conf)
 
 
-    run(model, imglogdir, visual_channels=opt.visual_channels, eta=opt.eta,
+    run(opt.dataset, model, logdir, eta=opt.eta,
         vanilla=opt.vanilla_sample,  n_samples=opt.n_samples, custom_steps=opt.custom_steps,
-        batch_size=opt.batch_size, nplog=numpylogdir)
+        batch_size=opt.batch_size)
 
     print("done.")

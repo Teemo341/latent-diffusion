@@ -1,4 +1,5 @@
 from random import sample
+import glob
 import torch
 from torch.distributions import Categorical
 import torch.nn.functional as F
@@ -19,7 +20,7 @@ def load_original_HSI(dataset, path = None):
     HSI = np.load(path)
     return HSI
 
-def load_sampled_HSIs(algorithm, dataset, sample_times = 8, path = None):
+def load_sampled_HSIs(algorithm, dataset, path = None):
     if algorithm not in ["HUD", "GAN", "VAE", "MSCNN"]:
         raise ValueError(f"algorithm {algorithm} not supported")
     if dataset not in ['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected']:
@@ -28,8 +29,8 @@ def load_sampled_HSIs(algorithm, dataset, sample_times = 8, path = None):
     sampled_HSI = []
     
     if path is None:
-        for i in range(sample_times):
-            path = f'./experiments/results/{algorithm}/{dataset}/generated_{i}.npy'
+        sample_dir_list = glob.glob(f'./experiments/results/{algorithm}/{dataset}/*.npy')
+        for path in sample_dir_list:
             HSI = np.load(path)
             sampled_HSI.append(HSI)
     else:
@@ -167,7 +168,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--algorithms", type=str, nargs = '+', default=["GAN","HUD","VAE","MSCNN"])
     parser.add_argument("--datasets", type=str, nargs= '+', default=["Indian_Pines_Corrected", "KSC_Corrected", "Pavia", "PaviaU", "Salinas_Corrected"])
-    parser.add_argument("--sample_times", type=int, default=8)
     parser.add_argument("--metric", type=str, nargs='+', default=["IS", "FID", "F_p", "D_b", "spectral_curve"])
     args = parser.parse_args()
 
@@ -177,7 +177,7 @@ if __name__ == "__main__":
         classifier = load_classifier(args.dataset)
 
         for algorithm in args.algorithms:
-            sampled_images = load_sampled_HSIs(algorithm, dataset, args.sample_times)
+            sampled_images = load_sampled_HSIs(algorithm, dataset)
 
             IS = FID = F_p = D_b = None
 

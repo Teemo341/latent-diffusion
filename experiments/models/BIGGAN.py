@@ -206,6 +206,7 @@ def sample(generator, name, sample_times=8, save_full = True, save_RGB = True, h
         z = torch.randn(sample_times, get_dim(name), h, w).to(device)
         generated_images = generator(z).cpu()
         generated_images = rearrange(generated_images, 'b c h w -> b h w c')
+        generated_images = torch.clamp(generated_images, min=-1.0, max=1.0)
 
     #保存为npy
     if save_full:

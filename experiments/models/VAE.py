@@ -100,7 +100,7 @@ def train(model, train_loader, num_epochs=10):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
     model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.004)
-
+    scheduler_cosine = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
     for epoch in range(num_epochs):
         model.train()
         total_lossmse = 0
@@ -119,9 +119,11 @@ def train(model, train_loader, num_epochs=10):
             # 反向传播
             loss.backward()
             optimizer.step()
-            
+        
+
             total_lossmse += loss_BCE.item()     
             total_losskl += loss_KLD.item()
+        scheduler_cosine.step()
         # 日志输出
         print(f'Epoch {epoch+1}, MSE Loss: {total_lossmse / len(train_loader.dataset):.4f}, KL Loss: {total_losskl / len(train_loader.dataset):.4f}')
 
@@ -202,6 +204,7 @@ def sample(model, name, sample_times=8, save_full = True, save_RGB = True, save_
         z = torch.randn(sample_times, 20).to(device)
         generated_images = model.decode(z).cpu()
         generated_images = rearrange(generated_images, 'b c h w -> b h w c')
+        generated_images = torch.clamp(generated_images, min=-1.0, max=1.0)
 
     #保存为npy
     if save_full:

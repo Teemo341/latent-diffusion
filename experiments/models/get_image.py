@@ -12,25 +12,25 @@ import numpy as np
 
 
 # 加载数据集
-def get_whole_image(name): # b h w c
+def get_whole_image(name):  # b h w c
     if name == 'Indian_Pines_Corrected':
         dataset = Indian_Pines_Corrected()
-        #(145, 145, 200).[36,17,11]
+        # (145, 145, 200).[36,17,11]
     elif name == 'KSC_Corrected':
         dataset = KSC_Corrected()
-        #(512, 614, 176).[28,9,10]
+        # (512, 614, 176).[28,9,10]
     elif name == "Pavia":
         dataset = Pavia()
-        #((1093, 715, 102).[46,27,10]
+        # ((1093, 715, 102).[46,27,10]
     elif name == "PaviaU":
         dataset = PaviaU()
-        #(610, 340, 103).[46,27,10]
+        # (610, 340, 103).[46,27,10]
     elif name == "Salinas_Corrected":
         dataset = Salinas_Corrected()
-        #(512, 217, 204).[36,17,11]
+        # (512, 217, 204).[36,17,11]
     else:
         raise ValueError("Unsupported dataset")
-    dataloader = DataLoader(dataset, batch_size=1, shuffle=True,num_workers=4)
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers=4)
     return dataloader
 
 
@@ -50,26 +50,28 @@ class HSI_visualization():
     def __init__(self, name):
         super(HSI_visualization, self).__init__()
         if name == 'Indian_Pines_Corrected':
-            self.vis_channels = [36,17,11]
+            self.vis_channels = [36, 17, 11]
         elif name == 'KSC_Corrected':
-            self.vis_channels = [28,9,10]
+            self.vis_channels = [28, 9, 10]
         elif name == "Pavia":
-            self.vis_channels =[46,27,10]
+            self.vis_channels = [46, 27, 10]
         elif name == "PaviaU":
-            self.vis_channels =[46,27,10]
+            self.vis_channels = [46, 27, 10]
         elif name == "Salinas_Corrected":
-            self.vis_channels =[36,17,11]
+            self.vis_channels = [36, 17, 11]
         else:
             raise ValueError("Unsupported dataset")
 
     def visualization(self, HSI_image):
-        RGB_image = HSI_image[:,:,self.vis_channels]
-        RGB_image = (RGB_image+1.0)/2.0 # 将数据归一化到[0,1]
+        RGB_image = HSI_image[:, :, self.vis_channels]
+        RGB_image = (RGB_image+1.0)/2.0  # 将数据归一化到[0,1]
         RGB_image = (RGB_image.numpy() * 255).astype(np.uint8)
         return RGB_image
-    
+
 # 生成HSI
-def sample(generator, name, sample_times=8, save_full = True, save_RGB = True, h=32, w=32, save_dic="./results/GAN"):
+
+
+def sample(generator, name, sample_times=8, save_full=True, save_RGB=True, h=32, w=32, save_dic="./results/GAN"):
     save_dic = os.path.join(save_dic, name)
     if not os.path.exists(save_dic):
         os.makedirs(save_dic)
@@ -81,10 +83,11 @@ def sample(generator, name, sample_times=8, save_full = True, save_RGB = True, h
         generated_images = generator(z).cpu()
         generated_images = rearrange(generated_images, 'b c h w -> b h w c')
 
-    #保存为npy
+    # 保存为npy
     if save_full:
         for i in range(sample_times):
-            np.save(os.path.join(save_dic, f"generated_{i}.npy"), generated_images[i].numpy())
+            np.save(os.path.join(
+                save_dic, f"generated_{i}.npy"), generated_images[i].numpy())
 
     # 保存伪彩色
     if save_RGB:
@@ -93,19 +96,25 @@ def sample(generator, name, sample_times=8, save_full = True, save_RGB = True, h
             image = vis.visualization(generated_images[i])
             plt.imshow(image)
             plt.axis('off')
-            plt.savefig(os.path.join(save_dic, f"generated_{i}.png"),dpi=100,bbox_inches='tight',pad_inches = 0)
+            plt.savefig(os.path.join(
+                save_dic, f"generated_{i}.png"), dpi=100, bbox_inches='tight', pad_inches=0)
             # plt.imsave(os.path.join(save_dic, f"generated_{i}.png"), image,dpi=100,bbox_inches='tight',pad_inches = 0)
     return generated_images
 
+
 if __name__ == '__main__':
     paser = argparse.ArgumentParser()
-    paser.add_argument('--datasets', type=str, nargs='+', default=['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected'], help='which datasets, default all')
-    paser.add_argument('--image_dir', type=str, default='./experiments/metric/original_image', help='directory to save results')
-    paser.add_argument('--save_full', type=bool, default=True, help='save full image or not')
-    paser.add_argument('--save_RGB', type=bool, default=True, help='save RGB image or not')
+    paser.add_argument('--datasets', type=str, nargs='+', default=[
+                       'Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected'], help='which datasets, default all')
+    paser.add_argument('--image_dir', type=str,
+                       default='./experiments/metric/original_image', help='directory to save results')
+    paser.add_argument('--save_full', type=bool, default=True,
+                       help='save full image or not')
+    paser.add_argument('--save_RGB', type=bool, default=True,
+                       help='save RGB image or not')
 
     args = paser.parse_args()
-    
+
     for name in args.datasets:
         dataloader = get_whole_image(name)
         for i, data in enumerate(dataloader):
@@ -119,6 +128,6 @@ if __name__ == '__main__':
                 image = vis.visualization(data[0])
                 plt.imshow(image)
                 plt.axis('off')
-                plt.savefig(os.path.join(save_dic, f"RGB.png"),dpi=100,bbox_inches='tight',pad_inches = 0)
+                plt.savefig(os.path.join(save_dic, f"RGB.png"),
+                            dpi=100, bbox_inches='tight', pad_inches=0)
                 break
-    

@@ -1,0 +1,10 @@
+base:
+- ./models/HUD/PaviaU/config.yaml
+batch_size: 4
+custom_steps: 250
+dataset: PaviaU
+eta: 1.0
+logdir: ./experiments/results/HUD
+n_samples: 8
+resume: ./models/HUD/PaviaU
+vanilla_sample: false
