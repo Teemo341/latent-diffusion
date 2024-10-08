@@ -1,0 +1,4 @@
+Start training Salinas_Corrected dataset
+/data_ssy/latent-diffusion/experiments/models/WGANGP.py:88: UserWarning: nn.init.normal is now deprecated in favor of nn.init.normal_.
+  torch.nn.init.normal(m.weight.data,0.0,0.02)
+slurmstepd: error: *** JOB 22823 ON node9 CANCELLED AT 2024-10-01T00:16:30 ***

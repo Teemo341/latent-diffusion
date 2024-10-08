@@ -2,14 +2,15 @@
 import argparse
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
 import torch.optim as optim
-from torchvision import datasets, transforms
+#from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from einops import rearrange
 from ldm.data.HSI import *
 import numpy as np
+import torch.nn.functional as F
 from torchsummary import summary
 
 #class MidLayer(nn.Module):
@@ -30,13 +31,13 @@ class ResidualBlock(nn.Module):
         return self.relu(out)
     
 class ConvVAE(nn.Module):
-    def __init__(self, H, W):
+    def __init__(self, in_channels, H, W):
         super(ConvVAE,self).__init__()
         self.H = H  # 存储高度
         self.W = W  # 存储宽度
         # 编码器部分
         self.encoder = nn.Sequential(
-            nn.Conv2d(200, 128, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(in_channels, 128, kernel_size=3, stride=2, padding=1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2),
             ResidualBlock(128),
@@ -62,8 +63,8 @@ class ConvVAE(nn.Module):
             nn.ConvTranspose2d(64, 128, kernel_size=3, stride=2, padding=1, output_padding=1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(0.2),
-            nn.ConvTranspose2d(128, 200, kernel_size=3, stride=2, padding=1, output_padding=1),
-            nn.BatchNorm2d(200),
+            nn.ConvTranspose2d(128, in_channels, kernel_size=3, stride=2, padding=1, output_padding=1),
+            nn.BatchNorm2d(in_channels),
             nn.LeakyReLU(0.2),
             nn.Tanh()
         )
@@ -99,8 +100,8 @@ def loss_function(recon_x, x, mu, logvar):
 def train(model, train_loader, num_epochs=10):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.004)
-    scheduler_cosine = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=num_epochs)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
+    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
     for epoch in range(num_epochs):
         model.train()
         total_lossmse = 0
@@ -123,12 +124,12 @@ def train(model, train_loader, num_epochs=10):
 
             total_lossmse += loss_BCE.item()     
             total_losskl += loss_KLD.item()
-        scheduler_cosine.step()
+        scheduler.step()
         # 日志输出
         print(f'Epoch {epoch+1}, MSE Loss: {total_lossmse / len(train_loader.dataset):.4f}, KL Loss: {total_losskl / len(train_loader.dataset):.4f}')
 
         if (epoch+1) % 5 == 0:
-            sample(model, name, sample_times=8, save_full=False, save_RGB=True, save_dic=f"./experiments/models/VAE/{epoch+1}")
+            sample(model, name, sample_times=8, save_full=True, save_RGB=True, save_dic=f"./experiments/models/VAE/Salinas_Corrected/{epoch+1}")
 # 生成图像
 
     # 保存或显示 sample，例如使用 save_image
@@ -227,13 +228,13 @@ if __name__ == '__main__':
     paser.add_argument('--datasets', type=str, nargs='+', default=['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected'], help='which datasets, default all')
     paser.add_argument('--batch_size', type=int, default=20, help='size of the batches')
     paser.add_argument('--image_size', type=int, default=32, help='size of the image')
-    paser.add_argument('--epochs', type=int, default=200, help='number of epochs of training')
+    paser.add_argument('--epochs', type=int, default=100, help='number of epochs of training')
     paser.add_argument('--warmup_epoches', type=int, default=0, help='number of warmup epochs of training')
     paser.add_argument('--sample_times', type=int, default=8, help='number of sample times')
     paser.add_argument('--save_checkpoint', type=bool, default=True, help='save checkpoint or not')
     paser.add_argument('--load_checkpoint', type=bool, default=False, help='load checkpoint or not')
     paser.add_argument('--checkpoint_dir', type=str, default='./experiments/models/checkpoints', help='directory to save checkpoints')
-    paser.add_argument('--image_dir', type=str, default='./experiments/results/VAE', help='directory to save results')
+    paser.add_argument('--image_dir', type=str, default='./experiments/results/VAE/Salinas_Corrected', help='directory to save results')
     paser.add_argument('--save_full', type=bool, default=True, help='save full image or not')
     paser.add_argument('--save_RGB', type=bool, default=True, help='save RGB image or not')
 
@@ -252,7 +253,8 @@ if __name__ == '__main__':
             print(f"Start training {name} dataset")
 
             H = W = args.image_size
-            model = ConvVAE(H, W)
+            in_channels = get_dim(name)
+            model = ConvVAE(in_channels, H, W)
             dataloader = get_dataloader(name, args.batch_size, args.image_size)
             train(model, dataloader, num_epochs=args.epochs)
 

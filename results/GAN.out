@@ -1,67 +1,67 @@
 Start training Indian_Pines_Corrected dataset
 warmup epoches 1/3
-Epoch [1/30], Step [203/407], d_loss_real: 21.2943, d_loss_fake: 23.0279
-Epoch [1/30], Step [406/407], d_loss_real: 21.3372, d_loss_fake: 22.9159
+Epoch [1/30], Step [203/407], d_loss_real: 0.4088, d_loss_fake: 0.3946
+Epoch [1/30], Step [406/407], d_loss_real: 0.2255, d_loss_fake: 0.2197
 warmup epoches 2/3
-Epoch [2/30], Step [203/407], d_loss_real: 21.4500, d_loss_fake: 22.5524
-Epoch [2/30], Step [406/407], d_loss_real: 21.4831, d_loss_fake: 22.4077
+Epoch [2/30], Step [203/407], d_loss_real: 0.0105, d_loss_fake: 0.0111
+Epoch [2/30], Step [406/407], d_loss_real: 0.0076, d_loss_fake: 0.0080
 warmup epoches 3/3
-Epoch [3/30], Step [203/407], d_loss_real: 21.5850, d_loss_fake: 21.9412
-Epoch [3/30], Step [406/407], d_loss_real: 21.6029, d_loss_fake: 21.7635
-Epoch [4/30], Step [203/407], d_loss_real: 21.6482, d_loss_fake: 21.2701, g_loss: 23.1202
-Epoch [4/30], Step [406/407], d_loss_real: 21.6495, d_loss_fake: 21.2283, g_loss: 23.1660
-Epoch [5/30], Step [203/407], d_loss_real: 21.6652, d_loss_fake: 21.0320, g_loss: 23.3728
-Epoch [5/30], Step [406/407], d_loss_real: 21.6466, d_loss_fake: 20.9200, g_loss: 23.4980
-Epoch [6/30], Step [203/407], d_loss_real: 21.5932, d_loss_fake: 20.5675, g_loss: 23.8865
-Epoch [6/30], Step [406/407], d_loss_real: 21.5879, d_loss_fake: 20.4138, g_loss: 24.0601
-Epoch [7/30], Step [203/407], d_loss_real: 21.5269, d_loss_fake: 19.9470, g_loss: 24.5905
-Epoch [7/30], Step [406/407], d_loss_real: 21.4880, d_loss_fake: 19.8242, g_loss: 24.7410
-Epoch [8/30], Step [203/407], d_loss_real: 21.3731, d_loss_fake: 19.4533, g_loss: 25.1748
-Epoch [8/30], Step [406/407], d_loss_real: 21.3486, d_loss_fake: 19.2892, g_loss: 25.3819
-Epoch [9/30], Step [203/407], d_loss_real: 21.2376, d_loss_fake: 18.7043, g_loss: 26.0938
-Epoch [9/30], Step [406/407], d_loss_real: 21.2010, d_loss_fake: 18.5245, g_loss: 26.3268
-Epoch [10/30], Step [203/407], d_loss_real: 21.1292, d_loss_fake: 18.0318, g_loss: 26.9800
-Epoch [10/30], Step [406/407], d_loss_real: 21.0923, d_loss_fake: 17.8889, g_loss: 27.1669
-Epoch [11/30], Step [203/407], d_loss_real: 21.0207, d_loss_fake: 17.8379, g_loss: 27.2464
-Epoch [11/30], Step [406/407], d_loss_real: 20.9675, d_loss_fake: 17.6695, g_loss: 27.4682
-Epoch [12/30], Step [203/407], d_loss_real: 20.7776, d_loss_fake: 17.2620, g_loss: 28.0341
-Epoch [12/30], Step [406/407], d_loss_real: 20.7496, d_loss_fake: 17.0412, g_loss: 28.3780
-Epoch [13/30], Step [203/407], d_loss_real: 20.6046, d_loss_fake: 16.0812, g_loss: 29.7630
-Epoch [13/30], Step [406/407], d_loss_real: 20.5581, d_loss_fake: 16.2899, g_loss: 29.4505
-Epoch [14/30], Step [203/407], d_loss_real: 20.3934, d_loss_fake: 16.1896, g_loss: 29.6208
-Epoch [14/30], Step [406/407], d_loss_real: 20.3163, d_loss_fake: 15.9278, g_loss: 30.0171
-Epoch [15/30], Step [203/407], d_loss_real: 20.1272, d_loss_fake: 15.6516, g_loss: 30.4745
-Epoch [15/30], Step [406/407], d_loss_real: 20.1125, d_loss_fake: 15.4155, g_loss: 30.8759
-Epoch [16/30], Step [203/407], d_loss_real: 20.6692, d_loss_fake: 17.7862, g_loss: 27.4389
-Epoch [16/30], Step [406/407], d_loss_real: 21.1585, d_loss_fake: 17.3181, g_loss: 28.0893
-Epoch [17/30], Step [203/407], d_loss_real: 21.6387, d_loss_fake: 16.5369, g_loss: 29.1554
-Epoch [17/30], Step [406/407], d_loss_real: 21.5046, d_loss_fake: 16.6811, g_loss: 28.9465
-Epoch [18/30], Step [203/407], d_loss_real: 20.9971, d_loss_fake: 15.4452, g_loss: 30.8449
-Epoch [18/30], Step [406/407], d_loss_real: 20.7612, d_loss_fake: 15.0577, g_loss: 31.4854
-Epoch [19/30], Step [203/407], d_loss_real: 20.2251, d_loss_fake: 14.0475, g_loss: 33.1664
-Epoch [19/30], Step [406/407], d_loss_real: 20.0417, d_loss_fake: 14.0096, g_loss: 33.2277
-Epoch [20/30], Step [203/407], d_loss_real: 19.7529, d_loss_fake: 15.7340, g_loss: 30.5952
-Epoch [20/30], Step [406/407], d_loss_real: 20.1011, d_loss_fake: 17.5199, g_loss: 28.0794
-Epoch [21/30], Step [203/407], d_loss_real: 21.4290, d_loss_fake: 21.8632, g_loss: 22.5704
-Epoch [21/30], Step [406/407], d_loss_real: 22.0236, d_loss_fake: 20.7101, g_loss: 23.8676
-Epoch [22/30], Step [203/407], d_loss_real: 23.4775, d_loss_fake: 18.0636, g_loss: 27.0442
-Epoch [22/30], Step [406/407], d_loss_real: 23.9468, d_loss_fake: 17.6973, g_loss: 27.5264
-Epoch [23/30], Step [203/407], d_loss_real: 24.0947, d_loss_fake: 16.7458, g_loss: 28.8602
-Epoch [23/30], Step [406/407], d_loss_real: 24.2529, d_loss_fake: 16.9658, g_loss: 28.5731
-Epoch [24/30], Step [203/407], d_loss_real: 23.4540, d_loss_fake: 16.4661, g_loss: 29.3198
-Epoch [24/30], Step [406/407], d_loss_real: 23.1156, d_loss_fake: 16.0351, g_loss: 29.9787
-Epoch [25/30], Step [203/407], d_loss_real: 21.3679, d_loss_fake: 14.5855, g_loss: 32.2431
-Epoch [25/30], Step [406/407], d_loss_real: 20.9741, d_loss_fake: 14.9602, g_loss: 31.6101
-Epoch [26/30], Step [203/407], d_loss_real: 21.1925, d_loss_fake: 15.2604, g_loss: 31.1627
-Epoch [26/30], Step [406/407], d_loss_real: 21.0096, d_loss_fake: 16.0362, g_loss: 29.9873
-Epoch [27/30], Step [203/407], d_loss_real: 19.9422, d_loss_fake: 16.1351, g_loss: 29.7781
-Epoch [27/30], Step [406/407], d_loss_real: 19.7012, d_loss_fake: 16.5427, g_loss: 29.1682
-Epoch [28/30], Step [203/407], d_loss_real: 19.6197, d_loss_fake: 17.0409, g_loss: 28.4705
-Epoch [28/30], Step [406/407], d_loss_real: 19.8263, d_loss_fake: 16.7756, g_loss: 28.8983
-Epoch [29/30], Step [203/407], d_loss_real: 20.9663, d_loss_fake: 15.5867, g_loss: 30.7385
-Epoch [29/30], Step [406/407], d_loss_real: 20.7893, d_loss_fake: 15.4241, g_loss: 30.9563
-Epoch [30/30], Step [203/407], d_loss_real: 19.8551, d_loss_fake: 14.1828, g_loss: 32.9831
-Epoch [30/30], Step [406/407], d_loss_real: 19.4898, d_loss_fake: 14.0586, g_loss: 33.1977
+Epoch [3/30], Step [203/407], d_loss_real: 0.0025, d_loss_fake: 0.0027
+Epoch [3/30], Step [406/407], d_loss_real: 0.0021, d_loss_fake: 0.0022
+Epoch [4/30], Step [203/407], d_loss_real: 0.3005, d_loss_fake: 0.2944, g_loss: 2.2428
+Epoch [4/30], Step [406/407], d_loss_real: 0.4984, d_loss_fake: 0.4112, g_loss: 1.6844
+Epoch [5/30], Step [203/407], d_loss_real: 0.6136, d_loss_fake: 0.4702, g_loss: 1.2203
+Epoch [5/30], Step [406/407], d_loss_real: 0.6292, d_loss_fake: 0.4931, g_loss: 1.1673
+Epoch [6/30], Step [203/407], d_loss_real: 0.6811, d_loss_fake: 0.5089, g_loss: 1.1087
+Epoch [6/30], Step [406/407], d_loss_real: 0.6554, d_loss_fake: 0.5125, g_loss: 1.0959
+Epoch [7/30], Step [203/407], d_loss_real: 0.2042, d_loss_fake: 0.1830, g_loss: 2.2835
+Epoch [7/30], Step [406/407], d_loss_real: 0.1273, d_loss_fake: 0.1230, g_loss: 2.7273
+Epoch [8/30], Step [203/407], d_loss_real: 0.0214, d_loss_fake: 0.0326, g_loss: 3.7574
+Epoch [8/30], Step [406/407], d_loss_real: 0.0160, d_loss_fake: 0.0257, g_loss: 4.0170
+Epoch [9/30], Step [203/407], d_loss_real: 0.0364, d_loss_fake: 0.0255, g_loss: 4.7439
+Epoch [9/30], Step [406/407], d_loss_real: 0.2320, d_loss_fake: 0.1057, g_loss: 3.7824
+Epoch [10/30], Step [203/407], d_loss_real: 0.5516, d_loss_fake: 0.3534, g_loss: 1.7709
+Epoch [10/30], Step [406/407], d_loss_real: 0.5867, d_loss_fake: 0.3895, g_loss: 1.6462
+Epoch [11/30], Step [203/407], d_loss_real: 0.6106, d_loss_fake: 0.4490, g_loss: 1.3153
+Epoch [11/30], Step [406/407], d_loss_real: 0.6425, d_loss_fake: 0.4576, g_loss: 1.2761
+Epoch [12/30], Step [203/407], d_loss_real: 0.5868, d_loss_fake: 0.4010, g_loss: 1.4558
+Epoch [12/30], Step [406/407], d_loss_real: 0.6003, d_loss_fake: 0.4404, g_loss: 1.3094
+Epoch [13/30], Step [203/407], d_loss_real: 0.5560, d_loss_fake: 0.4166, g_loss: 1.3866
+Epoch [13/30], Step [406/407], d_loss_real: 0.4859, d_loss_fake: 0.3132, g_loss: 1.7095
+Epoch [14/30], Step [203/407], d_loss_real: 0.4679, d_loss_fake: 0.3227, g_loss: 1.7271
+Epoch [14/30], Step [406/407], d_loss_real: 0.5869, d_loss_fake: 0.4123, g_loss: 1.4576
+Epoch [15/30], Step [203/407], d_loss_real: 0.5951, d_loss_fake: 0.5208, g_loss: 1.0927
+Epoch [15/30], Step [406/407], d_loss_real: 0.6575, d_loss_fake: 0.5550, g_loss: 1.0524
+Epoch [16/30], Step [203/407], d_loss_real: 0.7522, d_loss_fake: 0.6346, g_loss: 0.8435
+Epoch [16/30], Step [406/407], d_loss_real: 0.7265, d_loss_fake: 0.6376, g_loss: 0.8360
+Epoch [17/30], Step [203/407], d_loss_real: 0.6925, d_loss_fake: 0.6386, g_loss: 0.8337
+Epoch [17/30], Step [406/407], d_loss_real: 0.6792, d_loss_fake: 0.6028, g_loss: 0.8859
+Epoch [18/30], Step [203/407], d_loss_real: 0.6936, d_loss_fake: 0.6211, g_loss: 0.8671
+Epoch [18/30], Step [406/407], d_loss_real: 0.6004, d_loss_fake: 0.5468, g_loss: 1.0031
+Epoch [19/30], Step [203/407], d_loss_real: 0.1306, d_loss_fake: 0.1276, g_loss: 2.4358
+Epoch [19/30], Step [406/407], d_loss_real: 0.0946, d_loss_fake: 0.0845, g_loss: 3.0696
+Epoch [20/30], Step [203/407], d_loss_real: 0.0277, d_loss_fake: 0.0211, g_loss: 4.3830
+Epoch [20/30], Step [406/407], d_loss_real: 0.0225, d_loss_fake: 0.0181, g_loss: 4.5345
+Epoch [21/30], Step [203/407], d_loss_real: 0.0127, d_loss_fake: 0.0133, g_loss: 4.8140
+Epoch [21/30], Step [406/407], d_loss_real: 0.0119, d_loss_fake: 0.0134, g_loss: 4.8141
+Epoch [22/30], Step [203/407], d_loss_real: 0.0092, d_loss_fake: 0.0082, g_loss: 5.2992
+Epoch [22/30], Step [406/407], d_loss_real: 0.0072, d_loss_fake: 0.0069, g_loss: 5.5379
+Epoch [23/30], Step [203/407], d_loss_real: 0.0049, d_loss_fake: 0.0045, g_loss: 5.9960
+Epoch [23/30], Step [406/407], d_loss_real: 0.0047, d_loss_fake: 0.0039, g_loss: 6.1814
+Epoch [24/30], Step [203/407], d_loss_real: 0.0029, d_loss_fake: 0.0033, g_loss: 6.4685
+Epoch [24/30], Step [406/407], d_loss_real: 0.0029, d_loss_fake: 0.0028, g_loss: 6.6469
+Epoch [25/30], Step [203/407], d_loss_real: 0.0021, d_loss_fake: 0.0021, g_loss: 6.9663
+Epoch [25/30], Step [406/407], d_loss_real: 0.0019, d_loss_fake: 0.0018, g_loss: 7.1578
+Epoch [26/30], Step [203/407], d_loss_real: 0.0025, d_loss_fake: 0.0014, g_loss: 7.4645
+Epoch [26/30], Step [406/407], d_loss_real: 0.0022, d_loss_fake: 0.0013, g_loss: 7.5500
+Epoch [27/30], Step [203/407], d_loss_real: 0.0013, d_loss_fake: 0.0009, g_loss: 7.7798
+Epoch [27/30], Step [406/407], d_loss_real: 0.0010, d_loss_fake: 0.0008, g_loss: 7.9234
+Epoch [28/30], Step [203/407], d_loss_real: 0.0009, d_loss_fake: 0.0006, g_loss: 8.1644
+Epoch [28/30], Step [406/407], d_loss_real: 0.0008, d_loss_fake: 0.0006, g_loss: 8.2957
+Epoch [29/30], Step [203/407], d_loss_real: 0.0011, d_loss_fake: 0.0005, g_loss: 8.4446
+Epoch [29/30], Step [406/407], d_loss_real: 0.0008, d_loss_fake: 0.0005, g_loss: 8.4341
+Epoch [30/30], Step [203/407], d_loss_real: 0.0005, d_loss_fake: 0.0006, g_loss: 8.2964
+Epoch [30/30], Step [406/407], d_loss_real: 0.0005, d_loss_fake: 0.0007, g_loss: 8.1438
 Finish training Indian_Pines_Corrected dataset
 Save checkpoint to ./experiments/models/checkpoints/GAN/Indian_Pines_Corrected
 finish all datasets

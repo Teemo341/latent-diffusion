@@ -8,7 +8,8 @@ from torchvision import transforms
 from scipy.io import loadmat
 from einops import rearrange
 import matplotlib.pyplot as plt
-
+import random
+import torchvision.transforms.functional as F
 
 class HSIBase(Dataset):
     def __init__(self,
@@ -39,7 +40,7 @@ class HSIBase(Dataset):
             self.augment_method = transforms.Compose([
                 transforms.RandomHorizontalFlip(0.5),
                 transforms.RandomVerticalFlip(0.5),
-                transforms.RandomRotation(90),
+                transforms.Lambda(lambda img: F.rotate(img, random.choice([90, 180, 270])))
             ])
         else:
             self.augment_method = None

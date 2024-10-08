@@ -1,0 +1,6 @@
+Start training Salinas_Corrected dataset
+Epoch 1, MSE Loss: 0.055170935988725966
+Epoch 2, MSE Loss: 0.026286486557497074
+Epoch 3, MSE Loss: 0.02195260252709474
+Epoch 4, MSE Loss: 0.019607681680510674
+slurmstepd: error: *** JOB 22952 ON node6 CANCELLED AT 2024-10-08T10:46:18 ***
