@@ -196,7 +196,7 @@ class MSAB(nn.Module):
         return out
 
 class MST(nn.Module):
-    def __init__(self, in_dim=200, out_dim=200, dim=200, stage=2, num_blocks=[2,4,4]):
+    def __init__(self, in_dim=102, out_dim=102, dim=102, stage=2, num_blocks=[2,4,4]):
         super(MST, self).__init__()
         self.dim = dim
         self.stage = stage
@@ -278,11 +278,11 @@ class MST(nn.Module):
         return out
 
 class MST_Plus_Plus(nn.Module):
-    def __init__(self, in_channels=3, out_channels=200, n_feat=200, stage=3):
+    def __init__(self, in_channels=3, out_channels=102, n_feat=102, stage=3):
         super(MST_Plus_Plus, self).__init__()
         self.stage = stage
         self.conv_in = nn.Conv2d(in_channels, n_feat, kernel_size=3, padding=(3 - 1) // 2,bias=False)
-        modules_body = [MST(dim=200, stage=2, num_blocks=[1,1,1]) for _ in range(stage)]
+        modules_body = [MST(dim=102, stage=2, num_blocks=[1,1,1]) for _ in range(stage)]
         self.body = nn.Sequential(*modules_body)
         self.conv_out = nn.Conv2d(n_feat, out_channels, kernel_size=3, padding=(3 - 1) // 2,bias=False)
 
@@ -387,7 +387,7 @@ def train(model, train_loader, num_epochs=10):
         print(f'Epoch {epoch+1}, MSE Loss: {losses.avg}')
 
         if (epoch+1) % 5 == 0:
-            sample(model, name, sample_times=8, save_full=True, save_RGB=True, save_dic=f"./experiments/models/MSTPlus/Indian_Pines_Corrected/{epoch+1}")
+            sample(model, name, sample_times=8, save_full=True, save_RGB=True, save_dic=f"./experiments/models/MSTPlus/Pavia/{epoch+1}")
 # 生成图像
 
 # 加载数据集
@@ -496,7 +496,7 @@ if __name__ == '__main__':
     paser.add_argument('--save_checkpoint', type=bool, default=True, help='save checkpoint or not')
     paser.add_argument('--load_checkpoint', type=bool, default=False, help='load checkpoint or not')
     paser.add_argument('--checkpoint_dir', type=str, default='./experiments/models/checkpoints', help='directory to save checkpoints')
-    paser.add_argument('--image_dir', type=str, default='./experiments/results/MSTPlus/Indian_Pines_Corrected', help='directory to save results')
+    paser.add_argument('--image_dir', type=str, default='./experiments/results/MSTPlus/Pavia', help='directory to save results')
     paser.add_argument('--save_full', type=bool, default=True, help='save full image or not')
     paser.add_argument('--save_RGB', type=bool, default=True, help='save RGB image or not')
 

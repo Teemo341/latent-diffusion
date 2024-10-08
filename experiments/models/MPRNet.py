@@ -69,8 +69,8 @@ class SAM(nn.Module):
     def __init__(self, n_feat, kernel_size, bias):
         super(SAM, self).__init__()
         self.conv1 = conv(n_feat, n_feat, kernel_size, bias=bias)
-        self.conv2 = conv(n_feat,204, kernel_size, bias=bias)
-        self.conv3 = conv(204, n_feat, kernel_size, bias=bias)
+        self.conv2 = conv(n_feat,200, kernel_size, bias=bias)
+        self.conv3 = conv(200, n_feat, kernel_size, bias=bias)
 
     def forward(self, x, x_img):
         x1 = self.conv1(x)
@@ -243,7 +243,7 @@ class ORSNet(nn.Module):
 
 ##########################################################################
 class MPRNet(nn.Module):
-    def __init__(self, in_c=204, out_c=204, n_feat=204, scale_unetfeats=204, scale_orsnetfeats=204, num_cab=4, kernel_size=3, reduction=1, bias=False):
+    def __init__(self, in_c=200, out_c=200, n_feat=200, scale_unetfeats=200, scale_orsnetfeats=200, num_cab=4, kernel_size=3, reduction=1, bias=False):
         super(MPRNet, self).__init__()
 
         self.conv_in = nn.Conv2d(3, in_c, kernel_size=kernel_size, padding=(kernel_size - 1) // 2,
@@ -448,7 +448,7 @@ def train(model, train_loader, num_epochs=10):
         scheduler_cosine.step()
 
         if (epoch+1) % 5 == 0:
-            sample(model, name, sample_times=8, save_full=True, save_RGB=True, save_dic=f"./experiments/models/MPRNet/Salinas_Corrected/{epoch+1}")
+            sample(model, name, sample_times=8, save_full=True, save_RGB=True, save_dic=f"./experiments/models/MPRNet/Indian_Pines_Corrected/{epoch+1}")
 # 生成图像
 
 # 加载数据集
@@ -557,7 +557,7 @@ if __name__ == '__main__':
     paser.add_argument('--save_checkpoint', type=bool, default=True, help='save checkpoint or not')
     paser.add_argument('--load_checkpoint', type=bool, default=False, help='load checkpoint or not')
     paser.add_argument('--checkpoint_dir', type=str, default='./experiments/models/checkpoints', help='directory to save checkpoints')
-    paser.add_argument('--image_dir', type=str, default='./experiments/results/MPRNet/Salinas_Corrected', help='directory to save results')
+    paser.add_argument('--image_dir', type=str, default='./experiments/results/MPRNet/Indian_Pines_Corrected', help='directory to save results')
     paser.add_argument('--save_full', type=bool, default=True, help='save full image or not')
     paser.add_argument('--save_RGB', type=bool, default=True, help='save RGB image or not')
 
@@ -577,7 +577,7 @@ if __name__ == '__main__':
 
             H = W = args.image_size
             in_channels = get_dim(name)
-            model = MPRNet(in_c=204, out_c=204, n_feat=204, scale_unetfeats=204, scale_orsnetfeats=204, num_cab=4, kernel_size=3, reduction=1, bias=False)
+            model = MPRNet(in_c=200, out_c=200, n_feat=200, scale_unetfeats=200, scale_orsnetfeats=200, num_cab=4, kernel_size=3, reduction=1, bias=False)
             dataloader = get_dataloader(name, args.batch_size, args.image_size)
 
             train(model, dataloader, num_epochs=args.epochs)

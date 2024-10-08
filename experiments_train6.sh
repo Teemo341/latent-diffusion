@@ -1,6 +1,6 @@
 #! /bin/bash
-#SBATCH -J VAE
-#SBATCH -o ./results/VAE.out               
+#SBATCH -J MSTPlus
+#SBATCH -o ./results/MSTPlus1.out               
 #SBATCH -p compute2             
 #SBATCH -A compute2    
 #SBATCH --qos=compute2               
@@ -9,4 +9,5 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --gres=gpu:1
 
-python -u -m experiments.models.VAE  --datasets Indian_Pines_Corrected
+
+python -u -m experiments.models.MSTPlus1  --datasets KSC_Corrected

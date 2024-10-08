@@ -129,7 +129,7 @@ def train(model, train_loader, num_epochs=10):
         print(f'Epoch {epoch+1}, MSE Loss: {total_lossmse / len(train_loader.dataset):.4f}, KL Loss: {total_losskl / len(train_loader.dataset):.4f}')
 
         if (epoch+1) % 5 == 0:
-            sample(model, name, sample_times=8, save_full=True, save_RGB=True, save_dic=f"./experiments/models/VAE/Salinas_Corrected/{epoch+1}")
+            sample(model, name, sample_times=8, save_full=True, save_RGB=True, save_dic=f"./experiments/models/VAE/Indian_Pines_Corrected/{epoch+1}")
 # 生成图像
 
     # 保存或显示 sample，例如使用 save_image
@@ -228,13 +228,13 @@ if __name__ == '__main__':
     paser.add_argument('--datasets', type=str, nargs='+', default=['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected'], help='which datasets, default all')
     paser.add_argument('--batch_size', type=int, default=20, help='size of the batches')
     paser.add_argument('--image_size', type=int, default=32, help='size of the image')
-    paser.add_argument('--epochs', type=int, default=100, help='number of epochs of training')
+    paser.add_argument('--epochs', type=int, default=40, help='number of epochs of training')
     paser.add_argument('--warmup_epoches', type=int, default=0, help='number of warmup epochs of training')
     paser.add_argument('--sample_times', type=int, default=8, help='number of sample times')
     paser.add_argument('--save_checkpoint', type=bool, default=True, help='save checkpoint or not')
     paser.add_argument('--load_checkpoint', type=bool, default=False, help='load checkpoint or not')
     paser.add_argument('--checkpoint_dir', type=str, default='./experiments/models/checkpoints', help='directory to save checkpoints')
-    paser.add_argument('--image_dir', type=str, default='./experiments/results/VAE/Salinas_Corrected', help='directory to save results')
+    paser.add_argument('--image_dir', type=str, default='./experiments/results/VAE/Indian_Pines_Corrected', help='directory to save results')
     paser.add_argument('--save_full', type=bool, default=True, help='save full image or not')
     paser.add_argument('--save_RGB', type=bool, default=True, help='save RGB image or not')
 
