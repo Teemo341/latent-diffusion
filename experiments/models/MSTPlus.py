@@ -501,6 +501,8 @@ if __name__ == '__main__':
     paser.add_argument('--save_RGB', type=bool, default=True, help='save RGB image or not')
 
     args = paser.parse_args()
+
+    
     
     for name in args.datasets:
         if args.save_checkpoint or args.load_checkpoint:

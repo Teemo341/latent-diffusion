@@ -1,9 +1,9 @@
 #! /bin/bash
 #SBATCH -J MSTPlus
 #SBATCH -o ./results/MSTPlus1.out               
-#SBATCH -p compute2             
-#SBATCH -A compute2    
-#SBATCH --qos=compute2               
+#SBATCH -p compute1           
+#SBATCH -A compute1    
+#SBATCH --qos=compute1               
 #SBATCH -N 1               
 #SBATCH --ntasks-per-node=1                    
 #SBATCH --cpus-per-task=4

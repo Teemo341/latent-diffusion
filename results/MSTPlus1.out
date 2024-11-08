@@ -1,2 +1,2 @@
 Start training KSC_Corrected dataset
-slurmstepd: error: *** JOB 23020 ON node9 CANCELLED AT 2024-10-08T15:43:44 ***
+Epoch 1, MSE Loss: 0.15866115121796542
