@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 2.0e-06   # set to target_lr by starting main.py with '--scale_lr False'
+  base_learning_rate: 1.0e-5   # set to target_lr by starting main.py with '--scale_lr False'
   target: ldm.models.diffusion.ddpm_HSI.LatentDiffusion
   params:
     linear_start: 0.0015
@@ -15,7 +15,7 @@ model:
     cond_stage_trainable: False
     concat_mode: False
     scale_by_std: False
-    scale_factor : 5.0
+    scale_factor : 0.5
     monitor: 'val/loss_simple_ema'
 
     scheduler_config: # 10000 warmup steps
@@ -53,7 +53,7 @@ model:
 data:
   target: main_HSI.DataModuleFromConfig
   params:
-    batch_size: 32
+    batch_size: 64
     num_workers: 5
     wrap: False
     train:

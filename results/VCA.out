@@ -1,8 +1,8 @@
-max value: 4096
-SNR estimated = 29.51972198486328[dB]
+max value: 8192
+SNR estimated = 39.31022262573242[dB]
 ... Select the projective proj.
-input (340, 340, 3)
-abundance torch.Size([1, 5, 340, 340])
-z value range tensor(-23.5510, grad_fn=<MinBackward1>) tensor(20.7584, grad_fn=<MaxBackward1>) tensor(1.9073e-06, grad_fn=<MinBackward1>)
-resonstruct (340, 340, 3)
+input (145, 145, 3)
+abundance torch.Size([1, 16, 145, 145])
+z value range tensor(-3.0818, grad_fn=<MinBackward1>) tensor(2.3703, grad_fn=<MaxBackward1>) tensor(2.9206e-06, grad_fn=<MinBackward1>)
+resonstruct (145, 145, 3)
 finished

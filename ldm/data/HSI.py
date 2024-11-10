@@ -33,6 +33,8 @@ class HSIBase(Dataset):
             self.whole_image = np.clip(self.whole_image,0,value_range)
         else: # delete outlier
             self.max_value = self.whole_image.max()
+        self.mean_value = self.whole_image.mean()
+        self.max_diver = max(self.max_value-self.mean_value, self.mean_value)
         self.size = size
         self.split = split
         self.split_rate = split_rate
@@ -110,7 +112,9 @@ class HSIBase(Dataset):
         label = image_label[:,:,image_channel:]
 
         image = np.array(image)
-        example["image"] = (image / 127.5 - 1.0).astype(np.float32)
+        mean = self.mean_value/self.max_value
+        diver = self.max_diver/self.max_value
+        example["image"] = ((image/255-mean)/diver).astype(np.float32)
         example["label"] = np.array(label).astype(np.float32)
         return example
     

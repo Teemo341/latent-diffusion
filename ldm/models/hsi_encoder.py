@@ -424,7 +424,8 @@ if __name__ == '__main__':
     b_.save(args.save_path+args.data+"/reconstructed_image.png")
 
     z_ = z
-    z_ = z_*0.5233 + torch.randn_like(z_)*0.8521
+    # z_ = z_*0.5233 + torch.randn_like(z_)*0.8521
+    z_ = torch.randn_like(z_)
     b_ = model.decode(z_)
     b_ = rearrange(b_, 'b c h w -> b h w c')
     b_ = b_[0,:,:,:]
