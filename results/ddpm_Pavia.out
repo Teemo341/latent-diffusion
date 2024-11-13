@@ -1,1 +1,174 @@
-/tmp/slurmd/job26155/slurm_script: 行 12: 48449 段错误               (吐核)python -u main_HSI.py --base configs/HSI-VCA/Pavia-ldm-VCA.yaml -t
+True
+2
+Global seed set to 3407
+Running on GPUs 0,1
+LatentDiffusion: Running in eps-prediction mode
+DiffusionWrapper has 220.92 M params.
+Keeping EMAs of 340.
+/data_ssy/latent-diffusion/ldm/models/hsi_encoder.py:196: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  sd = torch.load(path, map_location="cpu")["state_dict"]
+Restored from models/first_stage_models/HSI/VCA/Pavia/model.ckpt
+Training LatentDiffusion as an unconditional model.
+Monitoring val/loss_simple_ema as checkpoint metric.
+Merged modelckpt-cfg: 
+{'target': 'pytorch_lightning.callbacks.ModelCheckpoint', 'params': {'dirpath': 'logs/2024-11-13T21-03-30_Pavia-ldm-VCA/checkpoints', 'filename': '{epoch:06}', 'verbose': True, 'save_last': True, 'monitor': 'val/loss_simple_ema', 'save_top_k': 3}}
+GPU available: True, used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+Max training epoches: 10, max training steps: None
+#### Data #####
+train, Pavia_train, 582768
+validation, Pavia_valid, 145692
+accumulate_grad_batches = 1
+Setting learning rate to 1.00e-03 = 1 (accumulate_grad_batches) * 2 (num_gpus) * 50 (batchsize) * 1.00e-05 (base_lr)
+Global seed set to 3407
+initializing ddp: GLOBAL_RANK: 0, MEMBER: 1/2
+Global seed set to 3407
+/data_ssy/latent-diffusion/ldm/models/hsi_encoder.py:196: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  sd = torch.load(path, map_location="cpu")["state_dict"]
+Global seed set to 3407
+initializing ddp: GLOBAL_RANK: 1, MEMBER: 2/2
+----------------------------------------------------------------------------------------------------
+distributed_backend=nccl
+All DDP processes registered. Starting ddp with 2 processes
+----------------------------------------------------------------------------------------------------
+
+/home/home_node6_1/ssy1/anaconda3/envs/ldm/lib/python3.8/site-packages/pytorch_lightning/core/datamodule.py:423: LightningDeprecationWarning: DataModule.setup has already been called, so it will not be called again. In v1.6 this behavior will change to always call DataModule.setup.
+  rank_zero_deprecation(
+LOCAL_RANK: 1 - CUDA_VISIBLE_DEVICES: [0,1]
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+Setting up LambdaLR scheduler...
+Set SLURM handle signals.
+Set SLURM handle signals.
+Project config
+model:
+  base_learning_rate: 1.0e-05
+  target: ldm.models.diffusion.ddpm_HSI.LatentDiffusion
+  params:
+    linear_start: 0.0015
+    linear_end: 0.0155
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    loss_type: l2
+    first_stage_key: image
+    cond_stage_key: image
+    image_size: 32
+    channels: 9
+    cond_stage_trainable: false
+    concat_mode: false
+    scale_by_std: false
+    scale_factor: 1.0
+    monitor: val/loss_simple_ema
+    scheduler_config:
+      target: ldm.lr_scheduler.LambdaLinearScheduler
+      params:
+        warm_up_steps:
+        - 10000
+        cycle_lengths:
+        - 10000000000000
+        f_start:
+        - 1.0e-06
+        f_max:
+        - 1.0
+        f_min:
+        - 1.0
+    unet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        image_size: 32
+        in_channels: 9
+        out_channels: 9
+        model_channels: 224
+        attention_resolutions:
+        - 4
+        - 2
+        - 1
+        num_res_blocks: 2
+        channel_mult:
+        - 1
+        - 2
+        - 4
+        num_heads: 8
+        use_scale_shift_norm: true
+        resblock_updown: true
+    first_stage_config:
+      target: ldm.models.hsi_encoder.VCA
+      params:
+        in_channels: 102
+        out_channels: 9
+        ckpt_path: models/first_stage_models/HSI/VCA/Pavia/model.ckpt
+    cond_stage_config: __is_unconditional__
+data:
+  target: main_HSI.DataModuleFromConfig
+  params:
+    batch_size: 50
+    num_workers: 5
+    wrap: false
+    train:
+      target: ldm.data.HSI.Pavia_train
+      params:
+        size: 32
+    validation:
+      target: ldm.data.HSI.Pavia_valid
+      params:
+        size: 32
+
+Lightning config
+callbacks:
+  image_logger:
+    target: main_HSI.ImageLogger_HSI
+    params:
+      batch_frequency: 5000
+      max_images: 8
+      increase_log_steps: false
+      visual_channels:
+      - 46
+      - 27
+      - 10
+      log_images_kwargs:
+        quantize_denoised: false
+        inpaint: false
+        plot_denoise_rows: false
+        plot_progressive_rows: true
+        plot_diffusion_rows: true
+trainer:
+  benchmark: true
+  max_epochs: 10
+  accelerator: ddp
+  gpus: 0,1
+
+
+  | Name              | Type             | Params
+-------------------------------------------------------
+0 | model             | DiffusionWrapper | 220 M 
+1 | model_ema         | LitEma           | 0     
+2 | first_stage_model | VCA              | 936   
+-------------------------------------------------------
+220 M     Trainable params
+936       Non-trainable params
+220 M     Total params
+883.695   Total estimated model params size (MB)
+Validation sanity check: 0it [00:00, ?it/s]Validation sanity check:   0%|          | 0/2 [00:00<?, ?it/s]True
+2
+Running on GPUs 0,1
+LatentDiffusion: Running in eps-prediction mode
+DiffusionWrapper has 220.92 M params.
+Keeping EMAs of 340.
+Restored from models/first_stage_models/HSI/VCA/Pavia/model.ckpt
+Training LatentDiffusion as an unconditional model.
+Monitoring val/loss_simple_ema as checkpoint metric.
+Merged modelckpt-cfg: 
+{'target': 'pytorch_lightning.callbacks.ModelCheckpoint', 'params': {'dirpath': 'logs/2024-11-13T21-03-38_Pavia-ldm-VCA/checkpoints', 'filename': '{epoch:06}', 'verbose': True, 'save_last': True, 'monitor': 'val/loss_simple_ema', 'save_top_k': 3}}
+Max training epoches: 10, max training steps: None
+#### Data #####
+train, Pavia_train, 582768
+validation, Pavia_valid, 145692
+accumulate_grad_batches = 1
+Setting learning rate to 1.00e-03 = 1 (accumulate_grad_batches) * 2 (num_gpus) * 50 (batchsize) * 1.00e-05 (base_lr)
+Setting up LambdaLR scheduler...
+Validation sanity check:  50%|█████     | 1/2 [00:04<00:04,  4.71s/it]Validation sanity check: 100%|██████████| 2/2 [00:05<00:00,  2.17s/it]                                                                      Global seed set to 3407
+Global seed set to 3407
+Training: -1it [00:00, ?it/s]Training:   0%|          | 0/7285 [00:00<00:00, 27962.03it/s]Epoch 0:   0%|          | 0/7285 [00:00<00:01, 6393.76it/s]  [rank0]:[W1113 21:03:53.080950294 reducer.cpp:1400] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+[rank1]:[W1113 21:03:53.130758065 reducer.cpp:1400] Warning: find_unused_parameters=True was specified in DDP constructor, but did not find any unused parameters in the forward pass. This flag results in an extra traversal of the autograd graph every iteration,  which can adversely affect performance. If your model indeed never has any unused parameters in the forward pass, consider turning this flag off. Note that this warning may be a false positive if your model has flow control causing later iterations to have unused parameters. (function operator())
+Epoch 0:   0%|          | 1/7285 [00:05<5:11:05,  2.56s/it]Epoch 0:   0%|          | 1/7285 [00:05<5:11:09,  2.56s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00713, train/loss_step=1.000, global_step=0.000, lr_abs=1e-9]Epoch 0:   0%|          | 2/7285 [00:05<4:01:43,  1.99s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00713, train/loss_step=1.000, global_step=0.000, lr_abs=1e-9]Epoch 0:   0%|          | 2/7285 [00:05<4:01:44,  1.99s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.0057, train/loss_step=0.999, global_step=1.000, lr_abs=1.01e-7]Epoch 0:   0%|          | 3/7285 [00:06<3:27:21,  1.71s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.0057, train/loss_step=0.999, global_step=1.000, lr_abs=1.01e-7]Epoch 0:   0%|          | 3/7285 [00:06<3:27:22,  1.71s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00647, train/loss_step=1.000, global_step=2.000, lr_abs=2.01e-7]Epoch 0:   0%|          | 4/7285 [00:07<3:06:42,  1.54s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00647, train/loss_step=1.000, global_step=2.000, lr_abs=2.01e-7]Epoch 0:   0%|          | 4/7285 [00:07<3:06:43,  1.54s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00949, train/loss_step=0.999, global_step=3.000, lr_abs=3.01e-7]Epoch 0:   0%|          | 5/7285 [00:08<2:53:00,  1.43s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00949, train/loss_step=0.999, global_step=3.000, lr_abs=3.01e-7]Epoch 0:   0%|          | 5/7285 [00:08<2:53:01,  1.43s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0153, train/loss_step=1.000, global_step=4.000, lr_abs=4.01e-7] Epoch 0:   0%|          | 6/7285 [00:09<2:43:08,  1.34s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0153, train/loss_step=1.000, global_step=4.000, lr_abs=4.01e-7]Epoch 0:   0%|          | 6/7285 [00:09<2:43:08,  1.34s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0102, train/loss_step=1.000, global_step=5.000, lr_abs=5.01e-7]Epoch 0:   0%|          | 7/7285 [00:10<2:35:46,  1.28s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0102, train/loss_step=1.000, global_step=5.000, lr_abs=5.01e-7]Epoch 0:   0%|          | 7/7285 [00:10<2:35:47,  1.28s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00789, train/loss_step=1.000, global_step=6.000, lr_abs=6.01e-7]Epoch 0:   0%|          | 8/7285 [00:11<2:29:58,  1.24s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00789, train/loss_step=1.000, global_step=6.000, lr_abs=6.01e-7]Epoch 0:   0%|          | 8/7285 [00:11<2:29:59,  1.24s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00785, train/loss_step=0.999, global_step=7.000, lr_abs=7.01e-7]Epoch 0:   0%|          | 9/7285 [00:11<2:25:29,  1.20s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00785, train/loss_step=0.999, global_step=7.000, lr_abs=7.01e-7]Epoch 0:   0%|          | 9/7285 [00:11<2:25:30,  1.20s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0127, train/loss_step=1.000, global_step=8.000, lr_abs=8.01e-7] Epoch 0:   0%|          | 10/7285 [00:12<2:21:40,  1.17s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0127, train/loss_step=1.000, global_step=8.000, lr_abs=8.01e-7]Epoch 0:   0%|          | 10/7285 [00:12<2:21:40,  1.17s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00555, train/loss_step=0.999, global_step=9.000, lr_abs=9.01e-7]Epoch 0:   0%|          | 11/7285 [00:13<2:18:34,  1.14s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00555, train/loss_step=0.999, global_step=9.000, lr_abs=9.01e-7]Epoch 0:   0%|          | 11/7285 [00:13<2:18:34,  1.14s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00514, train/loss_step=1.000, global_step=10.00, lr_abs=1e-6]   Epoch 0:   0%|          | 12/7285 [00:14<2:15:53,  1.12s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00514, train/loss_step=1.000, global_step=10.00, lr_abs=1e-6]Epoch 0:   0%|          | 12/7285 [00:14<2:15:53,  1.12s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00586, train/loss_step=1.000, global_step=11.00, lr_abs=1.1e-6]Epoch 0:   0%|          | 13/7285 [00:15<2:13:38,  1.10s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00586, train/loss_step=1.000, global_step=11.00, lr_abs=1.1e-6]Epoch 0:   0%|          | 13/7285 [00:15<2:13:38,  1.10s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00583, train/loss_step=1.000, global_step=12.00, lr_abs=1.2e-6]Epoch 0:   0%|          | 14/7285 [00:16<2:11:40,  1.09s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.00583, train/loss_step=1.000, global_step=12.00, lr_abs=1.2e-6]Epoch 0:   0%|          | 14/7285 [00:16<2:11:40,  1.09s/it, loss=1, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.00663, train/loss_step=0.997, global_step=13.00, lr_abs=1.3e-6]Epoch 0:   0%|          | 15/7285 [00:17<2:09:57,  1.07s/it, loss=1, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.00663, train/loss_step=0.997, global_step=13.00, lr_abs=1.3e-6]Epoch 0:   0%|          | 15/7285 [00:17<2:09:57,  1.07s/it, loss=1, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.0112, train/loss_step=0.997, global_step=14.00, lr_abs=1.4e-6] Epoch 0:   0%|          | 16/7285 [00:18<2:08:24,  1.06s/it, loss=1, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.0112, train/loss_step=0.997, global_step=14.00, lr_abs=1.4e-6]Epoch 0:   0%|          | 16/7285 [00:18<2:08:24,  1.06s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00666, train/loss_step=0.999, global_step=15.00, lr_abs=1.5e-6]Epoch 0:   0%|          | 17/7285 [00:18<2:07:03,  1.05s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.00666, train/loss_step=0.999, global_step=15.00, lr_abs=1.5e-6]Epoch 0:   0%|          | 17/7285 [00:18<2:07:03,  1.05s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.0163, train/loss_step=0.999, global_step=16.00, lr_abs=1.6e-6] Epoch 0:   0%|          | 18/7285 [00:19<2:05:48,  1.04s/it, loss=1, v_num=0, train/loss_simple_step=0.999, train/loss_vlb_step=0.0163, train/loss_step=0.999, global_step=16.00, lr_abs=1.6e-6]Epoch 0:   0%|          | 18/7285 [00:19<2:05:48,  1.04s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0191, train/loss_step=1.000, global_step=17.00, lr_abs=1.7e-6]Epoch 0:   0%|          | 19/7285 [00:20<2:04:47,  1.03s/it, loss=1, v_num=0, train/loss_simple_step=1.000, train/loss_vlb_step=0.0191, train/loss_step=1.000, global_step=17.00, lr_abs=1.7e-6]Epoch 0:   0%|          | 19/7285 [00:20<2:04:47,  1.03s/it, loss=1, v_num=0, train/loss_simple_step=0.998, train/loss_vlb_step=0.0153, train/loss_step=0.998, global_step=18.00, lr_abs=1.8e-6]Epoch 0:   0%|          | 20/7285 [00:21<2:03:46,  1.02s/it, loss=1, v_num=0, train/loss_simple_step=0.998, train/loss_vlb_step=0.0153, train/loss_step=0.998, global_step=18.00, lr_abs=1.8e-6]Epoch 0:   0%|          | 20/7285 [00:21<2:03:46,  1.02s/it, loss=1, v_num=0, train/loss_simple_step=0.996, train/loss_vlb_step=0.00599, train/loss_step=0.996, global_step=19.00, lr_abs=1.9e-6]Epoch 0:   0%|          | 21/7285 [00:22<2:02:53,  1.02s/it, loss=1, v_num=0, train/loss_simple_step=0.996, train/loss_vlb_step=0.00599, train/loss_step=0.996, global_step=19.00, lr_abs=1.9e-6]Epoch 0:   0%|          | 21/7285 [00:22<2:02:54,  1.02s/it, loss=0.999, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.00594, train/loss_step=0.997, global_step=20.00, lr_abs=2e-6]Epoch 0:   0%|          | 22/7285 [00:23<2:02:04,  1.01s/it, loss=0.999, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.00594, train/loss_step=0.997, global_step=20.00, lr_abs=2e-6]Epoch 0:   0%|          | 22/7285 [00:23<2:02:04,  1.01s/it, loss=0.999, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.00608, train/loss_step=0.997, global_step=21.00, lr_abs=2.1e-6]Epoch 0:   0%|          | 23/7285 [00:24<2:01:19,  1.00s/it, loss=0.999, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.00608, train/loss_step=0.997, global_step=21.00, lr_abs=2.1e-6]Epoch 0:   0%|          | 23/7285 [00:24<2:01:19,  1.00s/it, loss=0.999, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.0164, train/loss_step=0.997, global_step=22.00, lr_abs=2.2e-6] Epoch 0:   0%|          | 24/7285 [00:24<2:00:37,  1.00it/s, loss=0.999, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.0164, train/loss_step=0.997, global_step=22.00, lr_abs=2.2e-6]Epoch 0:   0%|          | 24/7285 [00:24<2:00:37,  1.00it/s, loss=0.999, v_num=0, train/loss_simple_step=0.996, train/loss_vlb_step=0.00508, train/loss_step=0.996, global_step=23.00, lr_abs=2.3e-6]Epoch 0:   0%|          | 25/7285 [00:25<2:00:00,  1.01it/s, loss=0.999, v_num=0, train/loss_simple_step=0.996, train/loss_vlb_step=0.00508, train/loss_step=0.996, global_step=23.00, lr_abs=2.3e-6]Epoch 0:   0%|          | 25/7285 [00:25<2:00:00,  1.01it/s, loss=0.999, v_num=0, train/loss_simple_step=0.998, train/loss_vlb_step=0.00581, train/loss_step=0.998, global_step=24.00, lr_abs=2.4e-6]Epoch 0:   0%|          | 26/7285 [00:26<1:59:24,  1.01it/s, loss=0.999, v_num=0, train/loss_simple_step=0.998, train/loss_vlb_step=0.00581, train/loss_step=0.998, global_step=24.00, lr_abs=2.4e-6]Epoch 0:   0%|          | 26/7285 [00:26<1:59:24,  1.01it/s, loss=0.999, v_num=0, train/loss_simple_step=0.996, train/loss_vlb_step=0.00764, train/loss_step=0.996, global_step=25.00, lr_abs=2.5e-6]Epoch 0:   0%|          | 27/7285 [00:27<1:58:52,  1.02it/s, loss=0.999, v_num=0, train/loss_simple_step=0.996, train/loss_vlb_step=0.00764, train/loss_step=0.996, global_step=25.00, lr_abs=2.5e-6]Epoch 0:   0%|          | 27/7285 [00:27<1:58:52,  1.02it/s, loss=0.998, v_num=0, train/loss_simple_step=0.994, train/loss_vlb_step=0.00596, train/loss_step=0.994, global_step=26.00, lr_abs=2.6e-6]Epoch 0:   0%|          | 28/7285 [00:28<1:58:20,  1.02it/s, loss=0.998, v_num=0, train/loss_simple_step=0.994, train/loss_vlb_step=0.00596, train/loss_step=0.994, global_step=26.00, lr_abs=2.6e-6]Epoch 0:   0%|          | 28/7285 [00:28<1:58:21,  1.02it/s, loss=0.998, v_num=0, train/loss_simple_step=0.998, train/loss_vlb_step=0.00643, train/loss_step=0.998, global_step=27.00, lr_abs=2.7e-6]Epoch 0:   0%|          | 29/7285 [00:29<1:57:52,  1.03it/s, loss=0.998, v_num=0, train/loss_simple_step=0.998, train/loss_vlb_step=0.00643, train/loss_step=0.998, global_step=27.00, lr_abs=2.7e-6]Epoch 0:   0%|          | 29/7285 [00:29<1:57:53,  1.03it/s, loss=0.998, v_num=0, train/loss_simple_step=0.995, train/loss_vlb_step=0.0273, train/loss_step=0.995, global_step=28.00, lr_abs=2.8e-6] Epoch 0:   0%|          | 30/7285 [00:30<1:57:26,  1.03it/s, loss=0.998, v_num=0, train/loss_simple_step=0.995, train/loss_vlb_step=0.0273, train/loss_step=0.995, global_step=28.00, lr_abs=2.8e-6]Epoch 0:   0%|          | 30/7285 [00:30<1:57:26,  1.03it/s, loss=0.998, v_num=0, train/loss_simple_step=0.995, train/loss_vlb_step=0.0166, train/loss_step=0.995, global_step=29.00, lr_abs=2.9e-6]Epoch 0:   0%|          | 31/7285 [00:30<1:57:02,  1.03it/s, loss=0.998, v_num=0, train/loss_simple_step=0.995, train/loss_vlb_step=0.0166, train/loss_step=0.995, global_step=29.00, lr_abs=2.9e-6]Epoch 0:   0%|          | 31/7285 [00:30<1:57:02,  1.03it/s, loss=0.997, v_num=0, train/loss_simple_step=0.992, train/loss_vlb_step=0.00612, train/loss_step=0.992, global_step=30.00, lr_abs=3e-6] Epoch 0:   0%|          | 32/7285 [00:31<1:56:37,  1.04it/s, loss=0.997, v_num=0, train/loss_simple_step=0.992, train/loss_vlb_step=0.00612, train/loss_step=0.992, global_step=30.00, lr_abs=3e-6]Epoch 0:   0%|          | 32/7285 [00:31<1:56:37,  1.04it/s, loss=0.997, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.0153, train/loss_step=0.997, global_step=31.00, lr_abs=3.1e-6]Epoch 0:   0%|          | 33/7285 [00:32<1:56:15,  1.04it/s, loss=0.997, v_num=0, train/loss_simple_step=0.997, train/loss_vlb_step=0.0153, train/loss_step=0.997, global_step=31.00, lr_abs=3.1e-6]Epoch 0:   0%|          | 33/7285 [00:32<1:56:15,  1.04it/s, loss=0.997, v_num=0, train/loss_simple_step=0.993, train/loss_vlb_step=0.00491, train/loss_step=0.993, global_step=32.00, lr_abs=3.2e-6]Epoch 0:   0%|          | 34/7285 [00:33<1:55:54,  1.04it/s, loss=0.997, v_num=0, train/loss_simple_step=0.993, train/loss_vlb_step=0.00491, train/loss_step=0.993, global_step=32.00, lr_abs=3.2e-6]Epoch 0:   0%|          | 34/7285 [00:33<1:55:54,  1.04it/s, loss=0.996, v_num=0, train/loss_simple_step=0.991, train/loss_vlb_step=0.0049, train/loss_step=0.991, global_step=33.00, lr_abs=3.3e-6] Epoch 0:   0%|          | 35/7285 [00:34<1:55:37,  1.05it/s, loss=0.996, v_num=0, train/loss_simple_step=0.991, train/loss_vlb_step=0.0049, train/loss_step=0.991, global_step=33.00, lr_abs=3.3e-6]Epoch 0:   0%|          | 35/7285 [00:34<1:55:37,  1.05it/s, loss=0.996, v_num=0, train/loss_simple_step=0.993, train/loss_vlb_step=0.00586, train/loss_step=0.993, global_step=34.00, lr_abs=3.4e-6]Epoch 0:   0%|          | 36/7285 [00:35<1:55:17,  1.05it/s, loss=0.996, v_num=0, train/loss_simple_step=0.993, train/loss_vlb_step=0.00586, train/loss_step=0.993, global_step=34.00, lr_abs=3.4e-6]Epoch 0:   0%|          | 36/7285 [00:35<1:55:17,  1.05it/s, loss=0.996, v_num=0, train/loss_simple_step=0.993, train/loss_vlb_step=0.00579, train/loss_step=0.993, global_step=35.00, lr_abs=3.5e-6]Epoch 0:   1%|          | 37/7285 [00:36<1:55:02,  1.05it/s, loss=0.996, v_num=0, train/loss_simple_step=0.993, train/loss_vlb_step=0.00579, train/loss_step=0.993, global_step=35.00, lr_abs=3.5e-6]Epoch 0:   1%|          | 37/7285 [00:36<1:55:02,  1.05it/s, loss=0.995, v_num=0, train/loss_simple_step=0.991, train/loss_vlb_step=0.00673, train/loss_step=0.991, global_step=36.00, lr_abs=3.6e-6]Epoch 0:   1%|          | 38/7285 [00:37<1:54:47,  1.05it/s, loss=0.995, v_num=0, train/loss_simple_step=0.991, train/loss_vlb_step=0.00673, train/loss_step=0.991, global_step=36.00, lr_abs=3.6e-6]Epoch 0:   1%|          | 38/7285 [00:37<1:54:47,  1.05it/s, loss=0.995, v_num=0, train/loss_simple_step=0.989, train/loss_vlb_step=0.00562, train/loss_step=0.989, global_step=37.00, lr_abs=3.7e-6]

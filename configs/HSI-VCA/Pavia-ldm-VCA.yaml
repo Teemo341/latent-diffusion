@@ -15,7 +15,7 @@ model:
     cond_stage_trainable: False
     concat_mode: False
     scale_by_std: False
-    scale_factor : 0.5
+    scale_factor : 1.0
     monitor: 'val/loss_simple_ema'
 
     scheduler_config: # 10000 warmup steps
@@ -53,7 +53,7 @@ model:
 data:
   target: main_HSI.DataModuleFromConfig
   params:
-    batch_size: 64
+    batch_size: 50
     num_workers: 5
     wrap: False
     train:
@@ -70,7 +70,7 @@ lightning:
     image_logger:
       target: main_HSI.ImageLogger_HSI
       params:
-        batch_frequency: 1000
+        batch_frequency: 5000
         max_images: 8
         increase_log_steps: False
         visual_channels: [46,27,10]
@@ -84,4 +84,4 @@ lightning:
 
   trainer:
     benchmark: True
-    max_epochs: 20
+    max_epochs: 10

@@ -112,9 +112,10 @@ class HSIBase(Dataset):
         label = image_label[:,:,image_channel:]
 
         image = np.array(image)
-        mean = self.mean_value/self.max_value
-        diver = self.max_diver/self.max_value
-        example["image"] = ((image/255-mean)/diver).astype(np.float32)
+        # mean = self.mean_value/self.max_value
+        # diver = self.max_diver/self.max_value
+        # example["image"] = ((image/255-mean)/diver).astype(np.float32)
+        example["image"] = (image/127.5-1).astype(np.float32)
         example["label"] = np.array(label).astype(np.float32)
         return example
     

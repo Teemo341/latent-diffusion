@@ -754,6 +754,7 @@ class LatentDiffusion(DDPM):
         out = [z, c]
         if return_first_stage_outputs:
             xrec = self.decode_first_stage(z)
+            # xrec = self.decode_first_stage(torch.randn_like(z).clamp(-1,1))
             out.extend([x, xrec])
         if return_original_cond:
             out.append(xc)
