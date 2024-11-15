@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 1.0e-5   # set to target_lr by starting main.py with '--scale_lr False'
+  base_learning_rate: 1.0e-6   # set to target_lr by starting main.py with '--scale_lr False'
   target: ldm.models.diffusion.ddpm_HSI.LatentDiffusion
   params:
     linear_start: 0.0015
@@ -15,7 +15,7 @@ model:
     cond_stage_trainable: False
     concat_mode: False
     scale_by_std: False
-    scale_factor : 1.0
+    scale_factor : 5.0
     monitor: 'val/loss_simple_ema'
 
     scheduler_config: # 10000 warmup steps
@@ -70,7 +70,7 @@ lightning:
     image_logger:
       target: main_HSI.ImageLogger_HSI
       params:
-        batch_frequency: 5000
+        batch_frequency: 2700
         max_images: 8
         increase_log_steps: False
         visual_channels: [46,27,10]

@@ -1,14 +1,15 @@
 max value: 4096
-SNR estimated = 32.88032531738281[dB]
+SNR estimated = 45.50722122192383[dB]
 ... Select the projective proj.
 norm std Parameter containing:
-tensor([1.1174, 0.5744, 3.6566, 0.7489, 0.5148, 0.1821, 0.0205, 0.6813, 0.1685],
+tensor([0.8163, 0.1682, 0.4876, 0.1981, 0.3054, 0.2256, 0.5632, 0.3863, 0.9393,
+        0.0608, 0.3807, 0.7632, 0.2502, 0.9061, 0.2419, 0.2089],
        requires_grad=True)
 input range -1.0 1.0
-input (715, 715, 3)
-abundance torch.Size([1, 9, 715, 715])
-z value range tensor(-21.4093, grad_fn=<MinBackward1>) tensor(52.7362, grad_fn=<MaxBackward1>)
-resonstruct range tensor(-1.5774, grad_fn=<MinBackward1>) tensor(1.6491, grad_fn=<MaxBackward1>)
-resonstruct (715, 715, 3)
-random resonstruct range tensor(-2.8870, grad_fn=<MinBackward1>) tensor(2.3594, grad_fn=<MaxBackward1>)
+input (217, 217, 3)
+abundance torch.Size([1, 16, 217, 217])
+z value range tensor(-6.5521, grad_fn=<MinBackward1>) tensor(16.0017, grad_fn=<MaxBackward1>)
+resonstruct range tensor(-1.0113, grad_fn=<MinBackward1>) tensor(1.1085, grad_fn=<MaxBackward1>)
+resonstruct (217, 217, 3)
+random resonstruct range tensor(-4.6981, grad_fn=<MinBackward1>) tensor(5.6648, grad_fn=<MaxBackward1>)
 finished
