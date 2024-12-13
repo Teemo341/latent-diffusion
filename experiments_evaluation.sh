@@ -1,11 +1,12 @@
 #! /bin/bash
 #SBATCH -J evaluation
 #SBATCH -o ./results/experiments_evaluation.out               
-#SBATCH -p compute1                 
-#SBATCH --qos=normal               
+#SBATCH -p compute1    
+#SBATCH -A compute1              
+#SBATCH --qos=compute1              
 #SBATCH -N 1               
 #SBATCH --ntasks-per-node=1                    
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=3
 #SBATCH --gres=gpu:1
 
-python -u -m experiments.metric.evaluation --algorithms GAN --datasets Indian_Pines_Corrected --metric spectral_curve
+python -u -m experiments.metric.evaluation --algorithms HUD --datasets Indian_Pines_Corrected

@@ -2,7 +2,7 @@ from random import sample
 import glob
 import torch
 from torch.distributions import Categorical
-import torch.nn.functional as F
+import torch.nn.functional as F_
 import numpy as np
 import torch.utils
 import matplotlib.pyplot as plt
@@ -65,7 +65,7 @@ def inception_score(classifier, sampled_images):
     # preds = torch.tensor([[0.9,0.1],[0.1,0.9],[0.1,0.9]])
     p_yx = preds
     p_y = p_yx.mean(dim = 0)
-    KLs = F.kl_div(p_y.log(), p_yx, reduction='none')
+    KLs = F_.kl_div(p_y.log(), p_yx, reduction='none')
     # KLs = (p_yx * (p_yx / p_y).log()) #? strange, F.kl_div(q.log, p) = p*log(p/q)
     KL = KLs.mean()
     IS = torch.exp(KL).item()
@@ -173,8 +173,8 @@ if __name__ == "__main__":
 
 
     for dataset in args.datasets:
-        original_image = load_original_HSI(args.dataset)
-        classifier = load_classifier(args.dataset)
+        original_image = load_original_HSI(dataset)
+        classifier = load_classifier(dataset)
 
         for algorithm in args.algorithms:
             sampled_images = load_sampled_HSIs(algorithm, dataset)
@@ -183,16 +183,16 @@ if __name__ == "__main__":
 
             if "IS" in args.metric:
                 IS = inception_score(classifier, sampled_images)
-                print(f"Inception Score: {IS}")
+                print(f"IS ↑: {IS}")
             if "FID" in args.metric:
                 FID = Frechet_Inception_Distance(classifier, sampled_images, original_image)
-                print(f"Frechet Inception Distance: {FID}")
+                print(f"FID↓: {FID}")
             if "F_p" in args.metric:
                 F_p = point_fidelity(sampled_images, original_image)
-                print(f"Point Fidelity: {F_p}")
+                print(f"F_p↓: {F_p}")
             if "D_b" in args.metric:
                 D_b = block_diversity(sampled_images, original_image)
-                print(f"Block Diversity: {D_b}")
+                print(f"D_b↑: {D_b}")
             if "spectral_curve" in args.metric:
                 spectral_curve_visualization(original_image, f'./experiments/metric/original_image/{dataset}')
                 sampled_images_ = np.array(sampled_images)
@@ -204,9 +204,9 @@ if __name__ == "__main__":
             if not os.path.exists(txt_path):
                 os.makedirs(txt_path)
             with open(f'{txt_path}/metric.txt','w') as f:
-                f.write(f"IS: {IS}\n")
-                f.write(f"FID: {FID}\n")
-                f.write(f"F_p: {F_p}\n")
-                f.write(f"D_b: {D_b}\n")
+                f.write(f"IS↑: {IS}\n")
+                f.write(f"FID↓: {FID}\n")
+                f.write(f"F_p↓: {F_p}\n")
+                f.write(f"D_b↑: {D_b}\n")
 
     print("finished")

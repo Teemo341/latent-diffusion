@@ -1,6 +1,6 @@
 #! /bin/bash
-#SBATCH -J Salinas_Corrected
-#SBATCH -o ./results/ddpm_Salinas_Corrected.out               
+#SBATCH -J PaviaU
+#SBATCH -o ./results/ddpm_PaviaU.out               
 #SBATCH -p compute1
 #SBATCH -A compute1
 #SBATCH --qos=compute1
@@ -9,4 +9,4 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --gres=gpu:2
 
-python -u main_HSI.py --base configs/HSI-VCA/Salinas_Corrected-ldm-VCA.yaml -t --gpus 0,1
+python -u main_HSI.py --base configs/HSI-VCA/PaviaU-ldm-VCA.yaml -t --gpus 0,1
