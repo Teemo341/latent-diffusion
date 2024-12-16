@@ -20,6 +20,8 @@ bin-release/
 /data
 **/__pycache__
 **/.vscode
+**.DS_Store
+**.ckpt
 /logs
 /models
 /src

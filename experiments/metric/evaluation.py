@@ -173,10 +173,12 @@ if __name__ == "__main__":
 
 
     for dataset in args.datasets:
+        print(dataset)
         original_image = load_original_HSI(dataset)
         classifier = load_classifier(dataset)
 
         for algorithm in args.algorithms:
+            print(algorithm)
             sampled_images = load_sampled_HSIs(algorithm, dataset)
 
             IS = FID = F_p = D_b = None
@@ -204,7 +206,7 @@ if __name__ == "__main__":
             if not os.path.exists(txt_path):
                 os.makedirs(txt_path)
             with open(f'{txt_path}/metric.txt','w') as f:
-                f.write(f"IS↑: {IS}\n")
+                f.write(f"IS↑ : {IS}\n")
                 f.write(f"FID↓: {FID}\n")
                 f.write(f"F_p↓: {F_p}\n")
                 f.write(f"D_b↑: {D_b}\n")
