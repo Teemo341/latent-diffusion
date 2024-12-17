@@ -9,10 +9,35 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy import linalg
 from einops import rearrange
+
 from experiments.metric.classifier import *
+import ldm.data.HSI as datasets_all
 
 
 # basic modules
+
+def make_original_HSI(dataset, path = None):
+    if path is None:
+        path = f'./experiments/metric/original_image/{dataset}/hsi.npy'
+    if dataset == 'Indian_Pines_Corrected':
+        dataset_ = datasets_all.Indian_Pines_Corrected(augment=False)
+        HSI = dataset_.__getitem__(0)['image']  # hwc
+    elif dataset == 'KSC_Corrected':
+        dataset_ = datasets_all.KSC_Corrected(augment=False)
+        HSI = dataset_.__getitem__(0)['image']
+    elif dataset == 'Pavia':
+        dataset_ = datasets_all.Pavia(augment=False)
+        HSI = dataset_.__getitem__(0)['image']
+    elif dataset == 'PaviaU':
+        dataset_ = datasets_all.PaviaU(augment=False)
+        HSI = dataset_.__getitem__(0)['image']
+    elif dataset == 'Salinas_Corrected':
+        dataset_ = datasets_all.Salinas_Corrected(augment=False)
+        HSI = dataset_.__getitem__(0)['image']
+    else:
+        raise ValueError(f"dataset {dataset} not supported")
+    np.save(path, HSI)
+    return HSI
 
 def load_original_HSI(dataset, path = None):
     if path is None:
@@ -108,12 +133,14 @@ def Frechet_Inception_Distance(classifier, sampled_images, original_image):
 def point_fidelity(sampled_images, original_image):
     # F_p = mean(min(||sampled_pixel-original_pixel||^2))
     F_p = []
-    sampled_images = np.array(sampled_images)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    sampled_images = torch.tensor(sampled_images,device = device)
     sampled_images = rearrange(sampled_images, 'b h w c -> (b h w) c')
-    original_image = np.array(original_image) # h w c
+    original_image = torch.tensor(original_image,device = device) # h w c
     for i in range(sampled_images.shape[0]):
-        sampled_image = sampled_images[i]
-        F_p.append(np.min(np.linalg.norm(sampled_image - original_image, axis=1), axis=0))
+        sampled_image = sampled_images[i] # c
+        sampled_image = sampled_image.unsqueeze(0).unsqueeze(0) # 1 1 c
+        F_p.append((original_image - sampled_image).pow(2).min().item())
     F_p = np.mean(F_p)
     return F_p
 
@@ -126,10 +153,12 @@ def block_diversity(sampled_images, original_image):
     slide_w = original_image.shape[1]-sampled_images.shape[2]+1
     for sampled_image in sampled_images:
         D_b_ = []
-        for i in range(slide_h):
-            for j in range(slide_w):
-                original_block = original_image[i:i+sampled_image.shape[0], j:j+sampled_image.shape[1]]
-                D_b_.append(np.linalg.norm(sampled_image - original_block))
+        for k in range(4): # rotate 4 times, considering that the sampled image may be rotated
+            original_image_rotated = np.rot90(original_image, k)
+            for i in range(slide_h):
+                for j in range(slide_w):
+                    original_block = original_image_rotated[i:i+sampled_image.shape[0], j:j+sampled_image.shape[1]]
+                    D_b_.append(np.linalg.norm(sampled_image - original_block))
         D_b.append(np.min(D_b_))
     D_b = np.mean(D_b)
     return D_b
@@ -149,7 +178,7 @@ def spectral_curve_visualization(HSI,save_path=None):
             C[i,j] = np.sum((y[j]<=HSI[:,x[i]]) * (HSI[:,x[i]]<=y[j+1]))
     
     #plot hotmap
-    C = np.sqrt(C) # augment color
+    # C = np.sqrt(C) # augment color
     plt.figure(figsize=(3,3))
     plt.imshow(C.T,aspect='auto',cmap='jet',origin = 'lower')
     plt.yticks([0,25,50,75],[0.0,0.25,0.5,0.75])
@@ -166,7 +195,8 @@ def spectral_curve_visualization(HSI,save_path=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--algorithms", type=str, nargs = '+', default=["GAN","HUD","VAE","MSCNN"])
+    parser.add_argument("--if_make_original_HSI", type=bool, default=False)
+    parser.add_argument("--algorithms", type=str, nargs = '+', default=["WGANGP","HUD","VAE","MPRNet"])
     parser.add_argument("--datasets", type=str, nargs= '+', default=["Indian_Pines_Corrected", "KSC_Corrected", "Pavia", "PaviaU", "Salinas_Corrected"])
     parser.add_argument("--metric", type=str, nargs='+', default=["IS", "FID", "F_p", "D_b", "spectral_curve"])
     args = parser.parse_args()
@@ -174,7 +204,10 @@ if __name__ == "__main__":
 
     for dataset in args.datasets:
         print(dataset)
-        original_image = load_original_HSI(dataset)
+        if args.if_make_original_HSI:
+            original_image = make_original_HSI(dataset)
+        else:
+            original_image = load_original_HSI(dataset)
         classifier = load_classifier(dataset)
 
         for algorithm in args.algorithms:

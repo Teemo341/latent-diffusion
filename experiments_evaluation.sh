@@ -9,4 +9,4 @@
 #SBATCH --cpus-per-task=3
 #SBATCH --gres=gpu:1
 
-python -u -m experiments.metric.evaluation --algorithms HUD --datasets Indian_Pines_Corrected
+python -u -m experiments.metric.evaluation --algorithms HUD --datasets KSC_Corrected --if_make_original_HSI True
