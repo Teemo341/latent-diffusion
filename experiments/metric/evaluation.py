@@ -134,6 +134,7 @@ def point_fidelity(sampled_images, original_image):
     # F_p = mean(min(||sampled_pixel-original_pixel||^2))
     F_p = []
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    sampled_images = np.array(sampled_images) # b h w c
     sampled_images = torch.tensor(sampled_images,device = device)
     sampled_images = rearrange(sampled_images, 'b h w c -> (b h w) c')
     original_image = torch.tensor(original_image,device = device) # h w c
@@ -141,6 +142,7 @@ def point_fidelity(sampled_images, original_image):
         sampled_image = sampled_images[i] # c
         sampled_image = sampled_image.unsqueeze(0).unsqueeze(0) # 1 1 c
         F_p.append((original_image - sampled_image).pow(2).min().item())
+    print(F_p)
     F_p = np.mean(F_p)
     return F_p
 

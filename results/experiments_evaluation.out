@@ -2,9 +2,8 @@ KSC_Corrected
 /data_ssy/latent-diffusion/experiments/metric/evaluation.py:71: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   classifier.load_state_dict(torch.load(path))
 HUD
-IS ↑: 1.00202214717865
-FID↓: (1.1618524098588612-1.972704650048924e-09j)
-F_p↓: 4.656979084014893
-D_b↑: 60.632293701171875
-spectral curve saved
-finished
+IS ↑: 1.0015268325805664
+FID↓: (0.9806757684302149-1.2364909155037807e-09j)
+/data_ssy/latent-diffusion/experiments/metric/evaluation.py:137: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at ../torch/csrc/utils/tensor_new.cpp:278.)
+  sampled_images = torch.tensor(sampled_images,device = device)
+F_p↓: 2.376172557327916e-10
