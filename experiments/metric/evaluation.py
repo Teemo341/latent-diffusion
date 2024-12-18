@@ -142,7 +142,6 @@ def point_fidelity(sampled_images, original_image):
         sampled_image = sampled_images[i] # c
         sampled_image = sampled_image.unsqueeze(0).unsqueeze(0) # 1 1 c
         F_p.append((original_image - sampled_image).pow(2).min().item())
-    print(F_p)
     F_p = np.mean(F_p)
     return F_p
 

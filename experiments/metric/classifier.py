@@ -49,7 +49,7 @@ class Classifier(nn.Module):
 # 定义训练函数
 
 
-def train(classifier, train_loader, valid_loader=None, num_epochs=100, lr=2e-4, erly_stop=5):
+def train(classifier, train_loader, valid_loader=None, num_epochs=100, lr=2e-4, erly_stop=5, checkpoint_dir=None):
 
     # 将模型移动到设备
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -66,9 +66,8 @@ def train(classifier, train_loader, valid_loader=None, num_epochs=100, lr=2e-4, 
         optimizer, step_size=int(num_epochs/5), gamma=0.1)
 
     # early stop if loss do not change for erly_stop times, stop training
-    loss_list_epoch = []
-    for i in range(erly_stop):
-        loss_list_epoch.append(torch.tensor(float(i)))
+    early_stop_count = 0
+    best_acc = 0
 
     # 开始训练
     for epoch in range(num_epochs):
@@ -120,27 +119,39 @@ def train(classifier, train_loader, valid_loader=None, num_epochs=100, lr=2e-4, 
                         loss_list_valid.append(loss_.item())
                         acc_list_valid.append(acc)
 
-                    print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], train_loss: {np.mean(loss_list_train):.4f}, train_acc: {np.mean(acc_list_train):.4f}, valid_loss: {np.mean(loss_list_valid):.4f}, valid_acc: {np.mean(acc_list_valid):.4f}")
-
                     # record early stop loss
-                    loss_list_epoch.pop(0)
-                    loss_list_epoch.append(np.mean(loss_list_valid))
+                    if np.mean(acc_list_valid) >= best_acc:
+                        best_acc = np.mean(acc_list_valid)
+                        early_stop_count = 0
+                        print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], train_loss: {np.mean(loss_list_train):.4f}, train_acc: {np.mean(acc_list_train):.4f}, valid_loss: {np.mean(loss_list_valid):.4f}, valid_acc: {np.mean(acc_list_valid):.4f}, best_acc: {best_acc:.4f}, early_stop_count: {early_stop_count}/{erly_stop}")
+                        if checkpoint_dir is not None:
+                            torch.save(classifier.state_dict(),
+                                       f"{checkpoint_dir}/classifier.pth")
+                            print(f"Save checkpoint to {checkpoint_dir}")
+                    else:
+                        early_stop_count += 1
+                        print(f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], train_loss: {np.mean(loss_list_train):.4f}, train_acc: {np.mean(acc_list_train):.4f}, valid_loss: {np.mean(loss_list_valid):.4f}, valid_acc: {np.mean(acc_list_valid):.4f}, best_acc: {best_acc:.4f}, early_stop_count: {early_stop_count}/{erly_stop}")
 
                 else:
-                    print(
-                        f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], train_loss: {np.mean(loss_list_train):.4f}, train_acc: {np.mean(acc_list_train):.4f}")
+                    if np.mean(acc_list_train) >= best_acc:
+                        best_acc = np.mean(acc_list_train)
+                        early_stop_count = 0
+                        print(
+                        f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], train_loss: {np.mean(loss_list_train):.4f}, train_acc: {np.mean(acc_list_train):.4f}, best_acc: {best_acc:.4f}, early_stop_count: {early_stop_count}/{erly_stop}")
+                        if checkpoint_dir is not None:
+                            torch.save(classifier.state_dict(),
+                                       f"{checkpoint_dir}/classifier.pth")
+                    else:
+                        early_stop_count += 1
+                        print(
+                        f"Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{len(train_loader)}], train_loss: {np.mean(loss_list_train):.4f}, train_acc: {np.mean(acc_list_train):.4f}, best_acc: {best_acc:.4f}, early_stop_count: {early_stop_count}/{erly_stop}")
 
-                    # record early stop loss
-                    loss_list_epoch.pop(0)
-                    loss_list_epoch.append(np.mean(loss_list_train))
+                if early_stop_count >= erly_stop:
+                        print(f"Early stop at epoch {epoch}")
+                        return
 
             # scheduler_step.step()
         # scheduler_epoch.step()
-
-        # early stop if loss do not change for erly_stop times, stop training
-        if np.var(loss_list_epoch)/np.mean(loss_list_epoch) < 1e-8:
-            print(f"Early stop at epoch {epoch}")
-            break
 
 
 # 加载数据集
@@ -265,13 +276,8 @@ if __name__ == '__main__':
             valid_loader = get_valid_loader(
                 name, args.batch_size, args.image_size)
             train(classifier, train_loader, valid_loader,
-                  num_epochs=args.epochs, lr=args.lr)
+                  num_epochs=args.epochs, lr=args.lr, checkpoint_dir=checkpoint_dir)
 
             print(f"Finish training {name} dataset")
-
-        if args.save_checkpoint:
-            torch.save(classifier.state_dict(),
-                       f"{checkpoint_dir}/classifier.pth")
-            print(f"Save checkpoint to {checkpoint_dir}")
 
     print("finish all datasets")

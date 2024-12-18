@@ -1,206 +1,220 @@
-Switching logdir from './models/HUD/KSC_Corrected' to './experiments/results/HUD/KSC_Corrected'
-{'model': {'base_learning_rate': 1e-06, 'target': 'ldm.models.diffusion.ddpm_HSI.LatentDiffusion', 'params': {'linear_start': 0.0015, 'linear_end': 0.0155, 'num_timesteps_cond': 1, 'log_every_t': 200, 'timesteps': 1000, 'loss_type': 'l2', 'first_stage_key': 'image', 'cond_stage_key': 'image', 'image_size': 32, 'channels': 13, 'cond_stage_trainable': False, 'concat_mode': False, 'scale_by_std': False, 'scale_factor': 20.0, 'monitor': 'val/loss_simple_ema', 'scheduler_config': {'target': 'ldm.lr_scheduler.LambdaLinearScheduler', 'params': {'warm_up_steps': [10000], 'cycle_lengths': [10000000000000], 'f_start': [1e-06], 'f_max': [1.0], 'f_min': [1.0]}}, 'unet_config': {'target': 'ldm.modules.diffusionmodules.openaimodel.UNetModel', 'params': {'image_size': 32, 'in_channels': 13, 'out_channels': 13, 'model_channels': 192, 'attention_resolutions': [1, 2, 4, 8], 'num_res_blocks': 2, 'channel_mult': [1, 2, 2, 4, 4], 'num_heads': 8, 'use_scale_shift_norm': True, 'resblock_updown': True}}, 'first_stage_config': {'target': 'ldm.models.hsi_encoder.VCA', 'params': {'in_channels': 176, 'out_channels': 13, 'ckpt_path': 'models/first_stage_models/HSI/VCA/KSC_Corrected/model.ckpt'}}, 'cond_stage_config': '__is_unconditional__'}}, 'data': {'target': 'main_HSI.DataModuleFromConfig', 'params': {'batch_size': 32, 'num_workers': 5, 'wrap': False, 'train': {'target': 'ldm.data.HSI.KSC_Corrected_train', 'params': {'size': 32}}, 'validation': {'target': 'ldm.data.HSI.KSC_Corrected_valid', 'params': {'size': 32}}}}}
-Loading model from ./models/HUD/KSC_Corrected/model.ckpt
+Switching logdir from './models/HUD/Indian_Pines_Corrected' to './experiments/results/HUD/Indian_Pines_Corrected'
+{'model': {'base_learning_rate': 1e-06, 'target': 'ldm.models.diffusion.ddpm_HSI.LatentDiffusion', 'params': {'linear_start': 0.0015, 'linear_end': 0.0155, 'num_timesteps_cond': 1, 'log_every_t': 200, 'timesteps': 1000, 'loss_type': 'l2', 'first_stage_key': 'image', 'cond_stage_key': 'image', 'image_size': 32, 'channels': 16, 'cond_stage_trainable': False, 'concat_mode': False, 'scale_by_std': False, 'scale_factor': 10.0, 'monitor': 'val/loss_simple_ema', 'scheduler_config': {'target': 'ldm.lr_scheduler.LambdaLinearScheduler', 'params': {'warm_up_steps': [10000], 'cycle_lengths': [10000000000000], 'f_start': [1e-06], 'f_max': [1.0], 'f_min': [1.0]}}, 'unet_config': {'target': 'ldm.modules.diffusionmodules.openaimodel.UNetModel', 'params': {'image_size': 32, 'in_channels': 16, 'out_channels': 16, 'model_channels': 192, 'attention_resolutions': [1, 2, 4, 8], 'num_res_blocks': 2, 'channel_mult': [1, 2, 2, 4, 4], 'num_heads': 8, 'use_scale_shift_norm': True, 'resblock_updown': True}}, 'first_stage_config': {'target': 'ldm.models.hsi_encoder.VCA', 'params': {'in_channels': 200, 'out_channels': 16, 'ckpt_path': 'models/first_stage_models/HSI/VCA/Indian_Pines_Corrected/model.ckpt'}}, 'cond_stage_config': '__is_unconditional__'}}, 'data': {'target': 'main_HSI.DataModuleFromConfig', 'params': {'batch_size': 32, 'num_workers': 5, 'wrap': False, 'train': {'target': 'ldm.data.HSI.Indian_Pines_Corrected_train', 'params': {'size': 32}}, 'validation': {'target': 'ldm.data.HSI.Indian_Pines_Corrected_valid', 'params': {'size': 32}}}}}
+Loading model from ./models/HUD/Indian_Pines_Corrected/model.ckpt
 /data_ssy/latent-diffusion/scripts/sample_diffusion_HSI.py:264: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   pl_sd = torch.load(ckpt, map_location="cpu")
 LatentDiffusion: Running in eps-prediction mode
-DiffusionWrapper has 295.00 M params.
+DiffusionWrapper has 295.01 M params.
 Keeping EMAs of 522.
 /data_ssy/latent-diffusion/ldm/models/hsi_encoder.py:196: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   sd = torch.load(path, map_location="cpu")["state_dict"]
-Restored from models/first_stage_models/HSI/VCA/KSC_Corrected/model.ckpt
+Restored from models/first_stage_models/HSI/VCA/Indian_Pines_Corrected/model.ckpt
 Training LatentDiffusion as an unconditional model.
-global step: 17530
+global step: 16300
 ===========================================================================
 logging to:
-./experiments/results/HUD/KSC_Corrected
+./experiments/results/HUD/Indian_Pines_Corrected
 ===========================================================================
-{'dataset': 'KSC_Corrected', 'resume': './models/HUD/KSC_Corrected', 'n_samples': 8, 'eta': 1.0, 'vanilla_sample': False, 'logdir': './experiments/results/HUD', 'custom_steps': 250, 'batch_size': 4, 'base': ['./models/HUD/KSC_Corrected/config.yaml']}
+{'dataset': 'Indian_Pines_Corrected', 'resume': './models/HUD/Indian_Pines_Corrected', 'n_samples': 8, 'eta': 1.0, 'vanilla_sample': False, 'logdir': './experiments/results/HUD', 'custom_steps': 250, 'batch_size': 4, 'base': ['./models/HUD/Indian_Pines_Corrected/config.yaml']}
 Using DDIM sampling with 250 sampling steps and eta=1.0
 Running unconditional sampling for 8 samples
 Sampling Batches (unconditional):   0%|          | 0/2 [00:00<?, ?it/s]Plotting: Switched to EMA weights
-Data shape for DDIM sampling is (4, 13, 32, 32), eta 1.0
+Data shape for DDIM sampling is (4, 16, 32, 32), eta 1.0
 Running DDIM Sampling with 250 timesteps
 
 DDIM Sampler:   0%|          | 0/250 [00:00<?, ?it/s][A
-DDIM Sampler:   0%|          | 1/250 [00:02<10:11,  2.46s/it][A
-DDIM Sampler:   1%|          | 3/250 [00:02<02:47,  1.48it/s][A
-DDIM Sampler:   2%|▏         | 5/250 [00:02<01:27,  2.80it/s][A
-DDIM Sampler:   3%|▎         | 7/250 [00:02<00:55,  4.36it/s][A
-DDIM Sampler:   4%|▎         | 9/250 [00:02<00:39,  6.12it/s][A
-DDIM Sampler:   4%|▍         | 11/250 [00:02<00:29,  8.04it/s][A
-DDIM Sampler:   6%|▌         | 14/250 [00:03<00:21, 11.08it/s][A
-DDIM Sampler:   7%|▋         | 17/250 [00:03<00:17, 13.70it/s][A
-DDIM Sampler:   8%|▊         | 20/250 [00:03<00:14, 15.85it/s][A
-DDIM Sampler:   9%|▉         | 23/250 [00:03<00:13, 17.37it/s][A
-DDIM Sampler:  10%|█         | 26/250 [00:03<00:12, 18.66it/s][A
-DDIM Sampler:  12%|█▏        | 29/250 [00:03<00:11, 19.68it/s][A
-DDIM Sampler:  13%|█▎        | 32/250 [00:03<00:10, 20.45it/s][A
-DDIM Sampler:  14%|█▍        | 35/250 [00:04<00:10, 21.00it/s][A
-DDIM Sampler:  15%|█▌        | 38/250 [00:04<00:09, 21.23it/s][A
-DDIM Sampler:  16%|█▋        | 41/250 [00:04<00:09, 21.27it/s][A
-DDIM Sampler:  18%|█▊        | 44/250 [00:04<00:09, 21.37it/s][A
-DDIM Sampler:  19%|█▉        | 47/250 [00:04<00:09, 21.69it/s][A
-DDIM Sampler:  20%|██        | 50/250 [00:04<00:09, 21.90it/s][A
-DDIM Sampler:  21%|██        | 53/250 [00:04<00:08, 22.06it/s][A
-DDIM Sampler:  22%|██▏       | 56/250 [00:05<00:08, 22.18it/s][A
-DDIM Sampler:  24%|██▎       | 59/250 [00:05<00:08, 22.26it/s][A
-DDIM Sampler:  25%|██▍       | 62/250 [00:05<00:08, 22.32it/s][A
-DDIM Sampler:  26%|██▌       | 65/250 [00:05<00:08, 22.29it/s][A
-DDIM Sampler:  27%|██▋       | 68/250 [00:05<00:08, 22.35it/s][A
-DDIM Sampler:  28%|██▊       | 71/250 [00:05<00:07, 22.38it/s][A
-DDIM Sampler:  30%|██▉       | 74/250 [00:05<00:07, 22.38it/s][A
-DDIM Sampler:  31%|███       | 77/250 [00:05<00:07, 22.38it/s][A
-DDIM Sampler:  32%|███▏      | 80/250 [00:06<00:07, 22.36it/s][A
-DDIM Sampler:  33%|███▎      | 83/250 [00:06<00:07, 22.11it/s][A
-DDIM Sampler:  34%|███▍      | 86/250 [00:06<00:07, 22.13it/s][A
-DDIM Sampler:  36%|███▌      | 89/250 [00:06<00:07, 22.22it/s][A
-DDIM Sampler:  37%|███▋      | 92/250 [00:06<00:07, 22.29it/s][A
-DDIM Sampler:  38%|███▊      | 95/250 [00:06<00:06, 22.33it/s][A
-DDIM Sampler:  39%|███▉      | 98/250 [00:06<00:06, 22.34it/s][A
-DDIM Sampler:  40%|████      | 101/250 [00:07<00:06, 22.38it/s][A
-DDIM Sampler:  42%|████▏     | 104/250 [00:07<00:06, 22.39it/s][A
-DDIM Sampler:  43%|████▎     | 107/250 [00:07<00:06, 22.41it/s][A
-DDIM Sampler:  44%|████▍     | 110/250 [00:07<00:06, 22.28it/s][A
-DDIM Sampler:  45%|████▌     | 113/250 [00:07<00:06, 22.07it/s][A
-DDIM Sampler:  46%|████▋     | 116/250 [00:07<00:06, 22.06it/s][A
-DDIM Sampler:  48%|████▊     | 119/250 [00:07<00:05, 22.18it/s][A
-DDIM Sampler:  49%|████▉     | 122/250 [00:07<00:05, 22.25it/s][A
-DDIM Sampler:  50%|█████     | 125/250 [00:08<00:05, 22.32it/s][A
-DDIM Sampler:  51%|█████     | 128/250 [00:08<00:05, 22.36it/s][A
-DDIM Sampler:  52%|█████▏    | 131/250 [00:08<00:05, 22.39it/s][A
-DDIM Sampler:  54%|█████▎    | 134/250 [00:08<00:05, 22.41it/s][A
-DDIM Sampler:  55%|█████▍    | 137/250 [00:08<00:05, 22.33it/s][A
-DDIM Sampler:  56%|█████▌    | 140/250 [00:08<00:04, 22.38it/s][A
-DDIM Sampler:  57%|█████▋    | 143/250 [00:08<00:04, 22.41it/s][A
-DDIM Sampler:  58%|█████▊    | 146/250 [00:09<00:04, 22.42it/s][A
-DDIM Sampler:  60%|█████▉    | 149/250 [00:09<00:04, 22.41it/s][A
-DDIM Sampler:  61%|██████    | 152/250 [00:09<00:04, 22.35it/s][A
-DDIM Sampler:  62%|██████▏   | 155/250 [00:09<00:04, 22.38it/s][A
-DDIM Sampler:  63%|██████▎   | 158/250 [00:09<00:04, 22.41it/s][A
-DDIM Sampler:  64%|██████▍   | 161/250 [00:09<00:03, 22.41it/s][A
-DDIM Sampler:  66%|██████▌   | 164/250 [00:09<00:03, 22.40it/s][A
-DDIM Sampler:  67%|██████▋   | 167/250 [00:10<00:03, 22.40it/s][A
-DDIM Sampler:  68%|██████▊   | 170/250 [00:10<00:03, 22.43it/s][A
-DDIM Sampler:  69%|██████▉   | 173/250 [00:10<00:03, 22.45it/s][A
-DDIM Sampler:  70%|███████   | 176/250 [00:10<00:03, 22.44it/s][A
-DDIM Sampler:  72%|███████▏  | 179/250 [00:10<00:03, 22.42it/s][A
-DDIM Sampler:  73%|███████▎  | 182/250 [00:10<00:03, 22.42it/s][A
-DDIM Sampler:  74%|███████▍  | 185/250 [00:10<00:02, 22.43it/s][A
-DDIM Sampler:  75%|███████▌  | 188/250 [00:10<00:02, 22.45it/s][A
-DDIM Sampler:  76%|███████▋  | 191/250 [00:11<00:02, 22.44it/s][A
-DDIM Sampler:  78%|███████▊  | 194/250 [00:11<00:02, 22.44it/s][A
-DDIM Sampler:  79%|███████▉  | 197/250 [00:11<00:02, 22.28it/s][A
-DDIM Sampler:  80%|████████  | 200/250 [00:11<00:02, 22.33it/s][A
-DDIM Sampler:  81%|████████  | 203/250 [00:11<00:02, 22.37it/s][A
-DDIM Sampler:  82%|████████▏ | 206/250 [00:11<00:01, 22.38it/s][A
-DDIM Sampler:  84%|████████▎ | 209/250 [00:11<00:01, 22.40it/s][A
-DDIM Sampler:  85%|████████▍ | 212/250 [00:12<00:01, 22.41it/s][A
-DDIM Sampler:  86%|████████▌ | 215/250 [00:12<00:01, 22.43it/s][A
-DDIM Sampler:  87%|████████▋ | 218/250 [00:12<00:01, 22.44it/s][A
-DDIM Sampler:  88%|████████▊ | 221/250 [00:12<00:01, 22.43it/s][A
-DDIM Sampler:  90%|████████▉ | 224/250 [00:12<00:01, 22.41it/s][A
-DDIM Sampler:  91%|█████████ | 227/250 [00:12<00:01, 22.23it/s][A
-DDIM Sampler:  92%|█████████▏| 230/250 [00:12<00:00, 22.01it/s][A
-DDIM Sampler:  93%|█████████▎| 233/250 [00:12<00:00, 21.88it/s][A
-DDIM Sampler:  94%|█████████▍| 236/250 [00:13<00:00, 21.79it/s][A
-DDIM Sampler:  96%|█████████▌| 239/250 [00:13<00:00, 21.84it/s][A
-DDIM Sampler:  97%|█████████▋| 242/250 [00:13<00:00, 22.00it/s][A
-DDIM Sampler:  98%|█████████▊| 245/250 [00:13<00:00, 22.12it/s][A
-DDIM Sampler:  99%|█████████▉| 248/250 [00:13<00:00, 22.23it/s][ADDIM Sampler: 100%|██████████| 250/250 [00:13<00:00, 18.21it/s]
+DDIM Sampler:   0%|          | 1/250 [00:07<32:29,  7.83s/it][A
+DDIM Sampler:   1%|          | 3/250 [00:07<08:32,  2.08s/it][A
+DDIM Sampler:   2%|▏         | 5/250 [00:08<04:14,  1.04s/it][A
+DDIM Sampler:   3%|▎         | 7/250 [00:08<02:31,  1.61it/s][A
+DDIM Sampler:   4%|▎         | 9/250 [00:08<01:38,  2.44it/s][A
+DDIM Sampler:   4%|▍         | 11/250 [00:08<01:08,  3.49it/s][A
+DDIM Sampler:   5%|▌         | 13/250 [00:08<00:49,  4.76it/s][A
+DDIM Sampler:   6%|▌         | 15/250 [00:08<00:37,  6.21it/s][A
+DDIM Sampler:   7%|▋         | 17/250 [00:08<00:29,  7.80it/s][A
+DDIM Sampler:   8%|▊         | 19/250 [00:08<00:24,  9.43it/s][A
+DDIM Sampler:   8%|▊         | 21/250 [00:09<00:21, 10.58it/s][A
+DDIM Sampler:   9%|▉         | 23/250 [00:09<00:19, 11.85it/s][A
+DDIM Sampler:  10%|█         | 25/250 [00:09<00:17, 13.21it/s][A
+DDIM Sampler:  11%|█         | 27/250 [00:09<00:15, 14.33it/s][A
+DDIM Sampler:  12%|█▏        | 29/250 [00:09<00:14, 15.25it/s][A
+DDIM Sampler:  12%|█▏        | 31/250 [00:09<00:13, 15.90it/s][A
+DDIM Sampler:  13%|█▎        | 33/250 [00:09<00:13, 16.40it/s][A
+DDIM Sampler:  14%|█▍        | 35/250 [00:09<00:12, 16.76it/s][A
+DDIM Sampler:  15%|█▍        | 37/250 [00:09<00:12, 16.94it/s][A
+DDIM Sampler:  16%|█▌        | 39/250 [00:10<00:12, 17.16it/s][A
+DDIM Sampler:  17%|█▋        | 42/250 [00:10<00:11, 18.67it/s][A
+DDIM Sampler:  18%|█▊        | 45/250 [00:10<00:10, 19.95it/s][A
+DDIM Sampler:  19%|█▉        | 48/250 [00:10<00:09, 20.77it/s][A
+DDIM Sampler:  20%|██        | 51/250 [00:10<00:09, 21.41it/s][A
+DDIM Sampler:  22%|██▏       | 54/250 [00:10<00:08, 21.87it/s][A
+DDIM Sampler:  23%|██▎       | 57/250 [00:10<00:08, 22.12it/s][A
+DDIM Sampler:  24%|██▍       | 60/250 [00:10<00:08, 22.32it/s][A
+DDIM Sampler:  25%|██▌       | 63/250 [00:11<00:08, 22.49it/s][A
+DDIM Sampler:  26%|██▋       | 66/250 [00:11<00:08, 22.65it/s][A
+DDIM Sampler:  28%|██▊       | 69/250 [00:11<00:07, 22.72it/s][A
+DDIM Sampler:  29%|██▉       | 72/250 [00:11<00:08, 22.19it/s][A
+DDIM Sampler:  30%|███       | 75/250 [00:11<00:08, 21.00it/s][A
+DDIM Sampler:  31%|███       | 78/250 [00:11<00:08, 20.27it/s][A
+DDIM Sampler:  32%|███▏      | 81/250 [00:11<00:08, 19.60it/s][A
+DDIM Sampler:  33%|███▎      | 83/250 [00:12<00:08, 19.18it/s][A
+DDIM Sampler:  34%|███▍      | 85/250 [00:12<00:08, 18.81it/s][A
+DDIM Sampler:  35%|███▌      | 88/250 [00:12<00:08, 19.92it/s][A
+DDIM Sampler:  36%|███▋      | 91/250 [00:12<00:07, 20.76it/s][A
+DDIM Sampler:  38%|███▊      | 94/250 [00:12<00:08, 19.44it/s][A
+DDIM Sampler:  38%|███▊      | 96/250 [00:12<00:08, 19.20it/s][A
+DDIM Sampler:  39%|███▉      | 98/250 [00:12<00:07, 19.03it/s][A
+DDIM Sampler:  40%|████      | 100/250 [00:12<00:07, 18.82it/s][A
+DDIM Sampler:  41%|████      | 102/250 [00:13<00:07, 18.54it/s][A
+DDIM Sampler:  42%|████▏     | 104/250 [00:13<00:07, 18.83it/s][A
+DDIM Sampler:  43%|████▎     | 107/250 [00:13<00:07, 20.10it/s][A
+DDIM Sampler:  44%|████▍     | 110/250 [00:13<00:06, 20.98it/s][A
+DDIM Sampler:  45%|████▌     | 113/250 [00:13<00:06, 21.62it/s][A
+DDIM Sampler:  46%|████▋     | 116/250 [00:13<00:06, 21.89it/s][A
+DDIM Sampler:  48%|████▊     | 119/250 [00:13<00:06, 21.72it/s][A
+DDIM Sampler:  49%|████▉     | 122/250 [00:13<00:05, 21.66it/s][A
+DDIM Sampler:  50%|█████     | 125/250 [00:14<00:05, 21.86it/s][A
+DDIM Sampler:  51%|█████     | 128/250 [00:14<00:05, 21.78it/s][A
+DDIM Sampler:  52%|█████▏    | 131/250 [00:14<00:05, 21.71it/s][A
+DDIM Sampler:  54%|█████▎    | 134/250 [00:14<00:05, 21.68it/s][A
+DDIM Sampler:  55%|█████▍    | 137/250 [00:14<00:05, 21.88it/s][A
+DDIM Sampler:  56%|█████▌    | 140/250 [00:14<00:05, 21.66it/s][A
+DDIM Sampler:  57%|█████▋    | 143/250 [00:14<00:04, 21.60it/s][A
+DDIM Sampler:  58%|█████▊    | 146/250 [00:15<00:04, 21.82it/s][A
+DDIM Sampler:  60%|█████▉    | 149/250 [00:15<00:04, 21.50it/s][A
+DDIM Sampler:  61%|██████    | 152/250 [00:15<00:04, 21.65it/s][A
+DDIM Sampler:  62%|██████▏   | 155/250 [00:15<00:04, 21.90it/s][A
+DDIM Sampler:  63%|██████▎   | 158/250 [00:15<00:04, 22.24it/s][A
+DDIM Sampler:  64%|██████▍   | 161/250 [00:15<00:04, 22.11it/s][A
+DDIM Sampler:  66%|██████▌   | 164/250 [00:15<00:03, 22.08it/s][A
+DDIM Sampler:  67%|██████▋   | 167/250 [00:16<00:03, 21.96it/s][A
+DDIM Sampler:  68%|██████▊   | 170/250 [00:16<00:03, 21.44it/s][A
+DDIM Sampler:  69%|██████▉   | 173/250 [00:16<00:03, 19.36it/s][A
+DDIM Sampler:  70%|███████   | 175/250 [00:16<00:03, 19.06it/s][A
+DDIM Sampler:  71%|███████   | 178/250 [00:16<00:03, 20.19it/s][A
+DDIM Sampler:  72%|███████▏  | 181/250 [00:16<00:03, 21.10it/s][A
+DDIM Sampler:  74%|███████▎  | 184/250 [00:16<00:03, 21.79it/s][A
+DDIM Sampler:  75%|███████▍  | 187/250 [00:17<00:02, 21.91it/s][A
+DDIM Sampler:  76%|███████▌  | 190/250 [00:17<00:02, 22.27it/s][A
+DDIM Sampler:  77%|███████▋  | 193/250 [00:17<00:02, 22.54it/s][A
+DDIM Sampler:  78%|███████▊  | 196/250 [00:17<00:02, 22.11it/s][A
+DDIM Sampler:  80%|███████▉  | 199/250 [00:17<00:02, 22.32it/s][A
+DDIM Sampler:  81%|████████  | 202/250 [00:17<00:02, 22.62it/s][A
+DDIM Sampler:  82%|████████▏ | 205/250 [00:17<00:01, 22.71it/s][A
+DDIM Sampler:  83%|████████▎ | 208/250 [00:17<00:01, 22.78it/s][A
+DDIM Sampler:  84%|████████▍ | 211/250 [00:18<00:01, 22.62it/s][A
+DDIM Sampler:  86%|████████▌ | 214/250 [00:18<00:01, 22.67it/s][A
+DDIM Sampler:  87%|████████▋ | 217/250 [00:18<00:01, 22.75it/s][A
+DDIM Sampler:  88%|████████▊ | 220/250 [00:18<00:01, 22.78it/s][A
+DDIM Sampler:  89%|████████▉ | 223/250 [00:18<00:01, 22.90it/s][A
+DDIM Sampler:  90%|█████████ | 226/250 [00:18<00:01, 22.94it/s][A
+DDIM Sampler:  92%|█████████▏| 229/250 [00:18<00:00, 23.07it/s][A
+DDIM Sampler:  93%|█████████▎| 232/250 [00:18<00:00, 23.17it/s][A
+DDIM Sampler:  94%|█████████▍| 235/250 [00:19<00:00, 22.87it/s][A
+DDIM Sampler:  95%|█████████▌| 238/250 [00:19<00:00, 22.99it/s][A
+DDIM Sampler:  96%|█████████▋| 241/250 [00:19<00:00, 22.86it/s][A
+DDIM Sampler:  98%|█████████▊| 244/250 [00:19<00:00, 22.86it/s][A
+DDIM Sampler:  99%|█████████▉| 247/250 [00:19<00:00, 22.97it/s][A
+DDIM Sampler: 100%|██████████| 250/250 [00:19<00:00, 23.06it/s][ADDIM Sampler: 100%|██████████| 250/250 [00:19<00:00, 12.64it/s]
 Plotting: Restored training weights
-Throughput for this batch: 0.2861979151917977
-Sampling Batches (unconditional):  50%|█████     | 1/2 [00:14<00:14, 14.42s/it]Plotting: Switched to EMA weights
-Data shape for DDIM sampling is (4, 13, 32, 32), eta 1.0
+Throughput for this batch: 0.19232496509834596
+Sampling Batches (unconditional):  50%|█████     | 1/2 [00:21<00:21, 21.38s/it]Plotting: Switched to EMA weights
+Data shape for DDIM sampling is (4, 16, 32, 32), eta 1.0
 Running DDIM Sampling with 250 timesteps
 
 DDIM Sampler:   0%|          | 0/250 [00:00<?, ?it/s][A
-DDIM Sampler:   1%|          | 3/250 [00:00<00:11, 22.16it/s][A
-DDIM Sampler:   2%|▏         | 6/250 [00:00<00:10, 22.19it/s][A
-DDIM Sampler:   4%|▎         | 9/250 [00:00<00:10, 22.29it/s][A
-DDIM Sampler:   5%|▍         | 12/250 [00:00<00:10, 22.25it/s][A
-DDIM Sampler:   6%|▌         | 15/250 [00:00<00:10, 22.29it/s][A
-DDIM Sampler:   7%|▋         | 18/250 [00:00<00:10, 22.31it/s][A
-DDIM Sampler:   8%|▊         | 21/250 [00:00<00:10, 22.31it/s][A
-DDIM Sampler:  10%|▉         | 24/250 [00:01<00:10, 22.04it/s][A
-DDIM Sampler:  11%|█         | 27/250 [00:01<00:10, 21.86it/s][A
-DDIM Sampler:  12%|█▏        | 30/250 [00:01<00:10, 21.72it/s][A
-DDIM Sampler:  13%|█▎        | 33/250 [00:01<00:09, 21.72it/s][A
-DDIM Sampler:  14%|█▍        | 36/250 [00:01<00:09, 21.90it/s][A
-DDIM Sampler:  16%|█▌        | 39/250 [00:01<00:09, 22.04it/s][A
-DDIM Sampler:  17%|█▋        | 42/250 [00:01<00:09, 22.13it/s][A
-DDIM Sampler:  18%|█▊        | 45/250 [00:02<00:09, 22.19it/s][A
-DDIM Sampler:  19%|█▉        | 48/250 [00:02<00:09, 22.24it/s][A
-DDIM Sampler:  20%|██        | 51/250 [00:02<00:08, 22.28it/s][A
-DDIM Sampler:  22%|██▏       | 54/250 [00:02<00:08, 22.31it/s][A
-DDIM Sampler:  23%|██▎       | 57/250 [00:02<00:08, 22.32it/s][A
-DDIM Sampler:  24%|██▍       | 60/250 [00:02<00:08, 22.35it/s][A
-DDIM Sampler:  25%|██▌       | 63/250 [00:02<00:08, 22.36it/s][A
-DDIM Sampler:  26%|██▋       | 66/250 [00:02<00:08, 22.37it/s][A
-DDIM Sampler:  28%|██▊       | 69/250 [00:03<00:08, 22.37it/s][A
-DDIM Sampler:  29%|██▉       | 72/250 [00:03<00:07, 22.37it/s][A
-DDIM Sampler:  30%|███       | 75/250 [00:03<00:07, 22.39it/s][A
-DDIM Sampler:  31%|███       | 78/250 [00:03<00:07, 22.37it/s][A
-DDIM Sampler:  32%|███▏      | 81/250 [00:03<00:07, 22.37it/s][A
-DDIM Sampler:  34%|███▎      | 84/250 [00:03<00:07, 22.34it/s][A
-DDIM Sampler:  35%|███▍      | 87/250 [00:03<00:07, 22.36it/s][A
-DDIM Sampler:  36%|███▌      | 90/250 [00:04<00:07, 22.38it/s][A
-DDIM Sampler:  37%|███▋      | 93/250 [00:04<00:07, 22.39it/s][A
-DDIM Sampler:  38%|███▊      | 96/250 [00:04<00:06, 22.37it/s][A
-DDIM Sampler:  40%|███▉      | 99/250 [00:04<00:06, 22.39it/s][A
-DDIM Sampler:  41%|████      | 102/250 [00:04<00:06, 22.39it/s][A
-DDIM Sampler:  42%|████▏     | 105/250 [00:04<00:06, 22.39it/s][A
-DDIM Sampler:  43%|████▎     | 108/250 [00:04<00:06, 22.39it/s][A
-DDIM Sampler:  44%|████▍     | 111/250 [00:04<00:06, 22.39it/s][A
-DDIM Sampler:  46%|████▌     | 114/250 [00:05<00:06, 22.38it/s][A
-DDIM Sampler:  47%|████▋     | 117/250 [00:05<00:05, 22.38it/s][A
-DDIM Sampler:  48%|████▊     | 120/250 [00:05<00:05, 22.40it/s][A
-DDIM Sampler:  49%|████▉     | 123/250 [00:05<00:05, 22.38it/s][A
-DDIM Sampler:  50%|█████     | 126/250 [00:05<00:05, 22.37it/s][A
-DDIM Sampler:  52%|█████▏    | 129/250 [00:05<00:05, 22.38it/s][A
-DDIM Sampler:  53%|█████▎    | 132/250 [00:05<00:05, 22.39it/s][A
-DDIM Sampler:  54%|█████▍    | 135/250 [00:06<00:05, 22.39it/s][A
-DDIM Sampler:  55%|█████▌    | 138/250 [00:06<00:04, 22.40it/s][A
-DDIM Sampler:  56%|█████▋    | 141/250 [00:06<00:04, 22.37it/s][A
-DDIM Sampler:  58%|█████▊    | 144/250 [00:06<00:04, 22.38it/s][A
-DDIM Sampler:  59%|█████▉    | 147/250 [00:06<00:04, 22.38it/s][A
-DDIM Sampler:  60%|██████    | 150/250 [00:06<00:04, 22.39it/s][A
-DDIM Sampler:  61%|██████    | 153/250 [00:06<00:04, 22.39it/s][A
-DDIM Sampler:  62%|██████▏   | 156/250 [00:06<00:04, 22.39it/s][A
-DDIM Sampler:  64%|██████▎   | 159/250 [00:07<00:04, 22.40it/s][A
-DDIM Sampler:  65%|██████▍   | 162/250 [00:07<00:03, 22.39it/s][A
-DDIM Sampler:  66%|██████▌   | 165/250 [00:07<00:03, 22.39it/s][A
-DDIM Sampler:  67%|██████▋   | 168/250 [00:07<00:03, 22.38it/s][A
-DDIM Sampler:  68%|██████▊   | 171/250 [00:07<00:03, 22.37it/s][A
-DDIM Sampler:  70%|██████▉   | 174/250 [00:07<00:03, 22.35it/s][A
-DDIM Sampler:  71%|███████   | 177/250 [00:07<00:03, 22.37it/s][A
-DDIM Sampler:  72%|███████▏  | 180/250 [00:08<00:03, 22.38it/s][A
-DDIM Sampler:  73%|███████▎  | 183/250 [00:08<00:02, 22.39it/s][A
-DDIM Sampler:  74%|███████▍  | 186/250 [00:08<00:02, 22.33it/s][A
-DDIM Sampler:  76%|███████▌  | 189/250 [00:08<00:02, 22.35it/s][A
-DDIM Sampler:  77%|███████▋  | 192/250 [00:08<00:02, 22.36it/s][A
-DDIM Sampler:  78%|███████▊  | 195/250 [00:08<00:02, 22.37it/s][A
-DDIM Sampler:  79%|███████▉  | 198/250 [00:08<00:02, 22.37it/s][A
-DDIM Sampler:  80%|████████  | 201/250 [00:09<00:02, 22.39it/s][A
-DDIM Sampler:  82%|████████▏ | 204/250 [00:09<00:02, 22.39it/s][A
-DDIM Sampler:  83%|████████▎ | 207/250 [00:09<00:01, 22.39it/s][A
-DDIM Sampler:  84%|████████▍ | 210/250 [00:09<00:01, 22.38it/s][A
-DDIM Sampler:  85%|████████▌ | 213/250 [00:09<00:01, 22.36it/s][A
-DDIM Sampler:  86%|████████▋ | 216/250 [00:09<00:01, 22.35it/s][A
-DDIM Sampler:  88%|████████▊ | 219/250 [00:09<00:01, 22.38it/s][A
-DDIM Sampler:  89%|████████▉ | 222/250 [00:09<00:01, 22.38it/s][A
-DDIM Sampler:  90%|█████████ | 225/250 [00:10<00:01, 22.37it/s][A
-DDIM Sampler:  91%|█████████ | 228/250 [00:10<00:00, 22.38it/s][A
-DDIM Sampler:  92%|█████████▏| 231/250 [00:10<00:00, 22.39it/s][A
-DDIM Sampler:  94%|█████████▎| 234/250 [00:10<00:00, 22.37it/s][A
-DDIM Sampler:  95%|█████████▍| 237/250 [00:10<00:00, 22.39it/s][A
-DDIM Sampler:  96%|█████████▌| 240/250 [00:10<00:00, 22.38it/s][A
-DDIM Sampler:  97%|█████████▋| 243/250 [00:10<00:00, 22.20it/s][A
-DDIM Sampler:  98%|█████████▊| 246/250 [00:11<00:00, 21.99it/s][A
-DDIM Sampler: 100%|█████████▉| 249/250 [00:11<00:00, 21.85it/s][ADDIM Sampler: 100%|██████████| 250/250 [00:11<00:00, 22.29it/s]
+DDIM Sampler:   1%|          | 3/250 [00:00<00:10, 23.33it/s][A
+DDIM Sampler:   2%|▏         | 6/250 [00:00<00:10, 23.17it/s][A
+DDIM Sampler:   4%|▎         | 9/250 [00:00<00:10, 23.27it/s][A
+DDIM Sampler:   5%|▍         | 12/250 [00:00<00:11, 21.12it/s][A
+DDIM Sampler:   6%|▌         | 15/250 [00:00<00:11, 20.14it/s][A
+DDIM Sampler:   7%|▋         | 18/250 [00:00<00:11, 19.65it/s][A
+DDIM Sampler:   8%|▊         | 20/250 [00:00<00:11, 19.43it/s][A
+DDIM Sampler:   9%|▉         | 22/250 [00:01<00:11, 19.31it/s][A
+DDIM Sampler:  10%|█         | 25/250 [00:01<00:10, 20.51it/s][A
+DDIM Sampler:  11%|█         | 28/250 [00:01<00:10, 21.33it/s][A
+DDIM Sampler:  12%|█▏        | 31/250 [00:01<00:10, 21.79it/s][A
+DDIM Sampler:  14%|█▎        | 34/250 [00:01<00:09, 22.13it/s][A
+DDIM Sampler:  15%|█▍        | 37/250 [00:01<00:09, 22.45it/s][A
+DDIM Sampler:  16%|█▌        | 40/250 [00:01<00:09, 22.74it/s][A
+DDIM Sampler:  17%|█▋        | 43/250 [00:01<00:09, 22.86it/s][A
+DDIM Sampler:  18%|█▊        | 46/250 [00:02<00:08, 22.97it/s][A
+DDIM Sampler:  20%|█▉        | 49/250 [00:02<00:08, 23.09it/s][A
+DDIM Sampler:  21%|██        | 52/250 [00:02<00:08, 23.19it/s][A
+DDIM Sampler:  22%|██▏       | 55/250 [00:02<00:08, 23.27it/s][A
+DDIM Sampler:  23%|██▎       | 58/250 [00:02<00:08, 23.27it/s][A
+DDIM Sampler:  24%|██▍       | 61/250 [00:02<00:08, 23.22it/s][A
+DDIM Sampler:  26%|██▌       | 64/250 [00:02<00:08, 23.10it/s][A
+DDIM Sampler:  27%|██▋       | 67/250 [00:03<00:07, 23.08it/s][A
+DDIM Sampler:  28%|██▊       | 70/250 [00:03<00:07, 23.06it/s][A
+DDIM Sampler:  29%|██▉       | 73/250 [00:03<00:07, 23.12it/s][A
+DDIM Sampler:  30%|███       | 76/250 [00:03<00:07, 23.13it/s][A
+DDIM Sampler:  32%|███▏      | 79/250 [00:03<00:07, 23.07it/s][A
+DDIM Sampler:  33%|███▎      | 82/250 [00:03<00:07, 22.94it/s][A
+DDIM Sampler:  34%|███▍      | 85/250 [00:03<00:07, 23.05it/s][A
+DDIM Sampler:  35%|███▌      | 88/250 [00:03<00:07, 22.97it/s][A
+DDIM Sampler:  36%|███▋      | 91/250 [00:04<00:06, 23.01it/s][A
+DDIM Sampler:  38%|███▊      | 94/250 [00:04<00:06, 23.10it/s][A
+DDIM Sampler:  39%|███▉      | 97/250 [00:04<00:06, 23.20it/s][A
+DDIM Sampler:  40%|████      | 100/250 [00:04<00:06, 23.18it/s][A
+DDIM Sampler:  41%|████      | 103/250 [00:04<00:06, 23.22it/s][A
+DDIM Sampler:  42%|████▏     | 106/250 [00:04<00:06, 22.47it/s][A
+DDIM Sampler:  44%|████▎     | 109/250 [00:04<00:06, 20.76it/s][A
+DDIM Sampler:  45%|████▍     | 112/250 [00:05<00:06, 20.04it/s][A
+DDIM Sampler:  46%|████▌     | 115/250 [00:05<00:06, 19.49it/s][A
+DDIM Sampler:  47%|████▋     | 117/250 [00:05<00:06, 19.27it/s][A
+DDIM Sampler:  48%|████▊     | 120/250 [00:05<00:06, 20.00it/s][A
+DDIM Sampler:  49%|████▉     | 123/250 [00:05<00:06, 18.86it/s][A
+DDIM Sampler:  50%|█████     | 126/250 [00:05<00:06, 19.50it/s][A
+DDIM Sampler:  52%|█████▏    | 129/250 [00:05<00:05, 20.42it/s][A
+DDIM Sampler:  53%|█████▎    | 132/250 [00:06<00:05, 20.88it/s][A
+DDIM Sampler:  54%|█████▍    | 135/250 [00:06<00:05, 21.35it/s][A
+DDIM Sampler:  55%|█████▌    | 138/250 [00:06<00:05, 21.74it/s][A
+DDIM Sampler:  56%|█████▋    | 141/250 [00:06<00:04, 22.03it/s][A
+DDIM Sampler:  58%|█████▊    | 144/250 [00:06<00:04, 22.28it/s][A
+DDIM Sampler:  59%|█████▉    | 147/250 [00:06<00:04, 22.27it/s][A
+DDIM Sampler:  60%|██████    | 150/250 [00:06<00:04, 22.23it/s][A
+DDIM Sampler:  61%|██████    | 153/250 [00:06<00:04, 22.45it/s][A
+DDIM Sampler:  62%|██████▏   | 156/250 [00:07<00:04, 22.47it/s][A
+DDIM Sampler:  64%|██████▎   | 159/250 [00:07<00:04, 22.59it/s][A
+DDIM Sampler:  65%|██████▍   | 162/250 [00:07<00:03, 22.59it/s][A
+DDIM Sampler:  66%|██████▌   | 165/250 [00:07<00:03, 22.53it/s][A
+DDIM Sampler:  67%|██████▋   | 168/250 [00:07<00:03, 22.73it/s][A
+DDIM Sampler:  68%|██████▊   | 171/250 [00:07<00:03, 22.72it/s][A
+DDIM Sampler:  70%|██████▉   | 174/250 [00:07<00:03, 22.78it/s][A
+DDIM Sampler:  71%|███████   | 177/250 [00:08<00:03, 22.76it/s][A
+DDIM Sampler:  72%|███████▏  | 180/250 [00:08<00:03, 20.10it/s][A
+DDIM Sampler:  73%|███████▎  | 183/250 [00:08<00:03, 19.34it/s][A
+DDIM Sampler:  74%|███████▍  | 185/250 [00:08<00:03, 19.02it/s][A
+DDIM Sampler:  75%|███████▍  | 187/250 [00:08<00:03, 17.71it/s][A
+DDIM Sampler:  76%|███████▌  | 189/250 [00:08<00:03, 16.95it/s][A
+DDIM Sampler:  76%|███████▋  | 191/250 [00:08<00:03, 17.14it/s][A
+DDIM Sampler:  77%|███████▋  | 193/250 [00:09<00:03, 17.32it/s][A
+DDIM Sampler:  78%|███████▊  | 195/250 [00:09<00:03, 17.38it/s][A
+DDIM Sampler:  79%|███████▉  | 197/250 [00:09<00:03, 17.51it/s][A
+DDIM Sampler:  80%|████████  | 200/250 [00:09<00:02, 18.68it/s][A
+DDIM Sampler:  81%|████████  | 203/250 [00:09<00:02, 19.86it/s][A
+DDIM Sampler:  82%|████████▏ | 205/250 [00:09<00:02, 19.34it/s][A
+DDIM Sampler:  83%|████████▎ | 207/250 [00:09<00:02, 19.41it/s][A
+DDIM Sampler:  84%|████████▍ | 210/250 [00:09<00:02, 19.31it/s][A
+DDIM Sampler:  85%|████████▍ | 212/250 [00:09<00:01, 19.16it/s][A
+DDIM Sampler:  86%|████████▌ | 214/250 [00:10<00:01, 18.99it/s][A
+DDIM Sampler:  86%|████████▋ | 216/250 [00:10<00:01, 18.80it/s][A
+DDIM Sampler:  87%|████████▋ | 218/250 [00:10<00:01, 18.47it/s][A
+DDIM Sampler:  88%|████████▊ | 220/250 [00:10<00:01, 18.39it/s][A
+DDIM Sampler:  89%|████████▉ | 223/250 [00:10<00:01, 19.78it/s][A
+DDIM Sampler:  90%|█████████ | 226/250 [00:10<00:01, 20.85it/s][A
+DDIM Sampler:  92%|█████████▏| 229/250 [00:10<00:01, 17.97it/s][A
+DDIM Sampler:  93%|█████████▎| 232/250 [00:11<00:00, 19.45it/s][A
+DDIM Sampler:  94%|█████████▍| 235/250 [00:11<00:00, 20.49it/s][A
+DDIM Sampler:  95%|█████████▌| 238/250 [00:11<00:00, 21.31it/s][A
+DDIM Sampler:  96%|█████████▋| 241/250 [00:11<00:00, 21.80it/s][A
+DDIM Sampler:  98%|█████████▊| 244/250 [00:11<00:00, 22.31it/s][A
+DDIM Sampler:  99%|█████████▉| 247/250 [00:11<00:00, 20.43it/s][A
+DDIM Sampler: 100%|██████████| 250/250 [00:11<00:00, 19.56it/s][ADDIM Sampler: 100%|██████████| 250/250 [00:11<00:00, 21.03it/s]
 Plotting: Restored training weights
-Throughput for this batch: 0.35663084631531977
+Throughput for this batch: 0.3363081497959796
 Finish after generating 8 samples
-Sampling Batches (unconditional):  50%|█████     | 1/2 [00:26<00:26, 26.17s/it]
-sampling of 8 images finished in 0.44 minutes.
+Sampling Batches (unconditional):  50%|█████     | 1/2 [00:33<00:33, 33.97s/it]
+sampling of 8 images finished in 0.57 minutes.
 done.
