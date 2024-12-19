@@ -10,7 +10,7 @@
 #SBATCH --gres=gpu:1
 
 python -u -m scripts.sample_diffusion_HSI \
-    --dataset Indian_Pines_Corrected \
+    --dataset KSC_Corrected \
     --resume ./models/HUD \
     --n_samples 8 \
     --eta 1.0 \
