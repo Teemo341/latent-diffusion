@@ -18,3 +18,5 @@ python -u -m scripts.sample_diffusion_HSI \
     --logdir ./experiments/results/HUD  \
     --custom_steps 250 \
     --batch_size 4
+
+    
