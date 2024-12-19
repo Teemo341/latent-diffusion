@@ -76,24 +76,25 @@ def inception_score(classifier, sampled_images):
     # classifier has softmax
     # all sampled image, has been normed
     classifier.eval()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    classifier.to(device)
+    with torch.no_grad():
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        classifier.to(device)
 
-    # infer predictions
-    sampled_images = np.array(sampled_images)
-    sampled_images = torch.tensor(sampled_images).to(device)
-    sampled_images = rearrange(sampled_images, 'b h w c -> b c h w')
-    sampled_predictions = classifier(sampled_images)
+        # infer predictions
+        sampled_images = np.array(sampled_images)
+        sampled_images = torch.tensor(sampled_images).to(device)
+        sampled_images = rearrange(sampled_images, 'b h w c -> b c h w')
+        sampled_predictions = classifier(sampled_images)
 
-    # calculate is
-    preds = rearrange(sampled_predictions, 'b c h w -> (b h w) c')
-    # preds = torch.tensor([[0.9,0.1],[0.1,0.9],[0.1,0.9]])
-    p_yx = preds
-    p_y = p_yx.mean(dim = 0)
-    KLs = F_.kl_div(p_y.log(), p_yx, reduction='none')
-    # KLs = (p_yx * (p_yx / p_y).log()) #? strange, F.kl_div(q.log, p) = p*log(p/q)
-    KL = KLs.mean()
-    IS = torch.exp(KL).item()
+        # calculate is
+        preds = rearrange(sampled_predictions, 'b c h w -> (b h w) c')
+        # preds = torch.tensor([[0.9,0.1],[0.1,0.9],[0.1,0.9]])
+        p_yx = preds
+        p_y = p_yx.mean(dim = 0)
+        KLs = F_.kl_div(p_y.log(), p_yx, reduction='none')
+        # KLs = (p_yx * (p_yx / p_y).log()) #? strange, F.kl_div(q.log, p) = p*log(p/q)
+        KL = KLs.mean()
+        IS = torch.exp(KL).item()
     # print(IS)
 
     return IS
@@ -102,47 +103,49 @@ def Frechet_Inception_Distance(classifier, sampled_images, original_image):
     # classifier has softmax
     # one sampled image, one original image, has been norm
     classifier.eval()
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    classifier.to(device)
-    classifier.classifier = torch.nn.Identity()
+    with torch.no_grad():
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        classifier.to(device)
+        classifier.classifier = torch.nn.Identity()
 
-    # infer predictions
-    original_image = torch.tensor(original_image).to(device) # h w c
-    original_image = rearrange(original_image, 'h w c -> 1 c h w')
-    sampled_images = np.array(sampled_images)
-    sampled_images = torch.tensor(sampled_images).to(device) # b h w c
-    sampled_images = rearrange(sampled_images, 'b h w c -> b c h w')
-    original_predictions = classifier(original_image)
-    sampled_predictions = classifier(sampled_images)
-    # print(original_predictions.shape, sampled_predictions.shape)
-    original_predictions = rearrange(original_predictions, 'b c h w-> (b h w) c')
-    sampled_predictions = rearrange(sampled_predictions, 'b c h w -> (b h w) c')
+        # infer predictions
+        original_image = torch.tensor(original_image).to(device) # h w c
+        original_image = rearrange(original_image, 'h w c -> 1 c h w')
+        sampled_images = np.array(sampled_images)
+        sampled_images = torch.tensor(sampled_images).to(device) # b h w c
+        sampled_images = rearrange(sampled_images, 'b h w c -> b c h w')
+        original_predictions = classifier(original_image)
+        sampled_predictions = classifier(sampled_images)
+        # print(original_predictions.shape, sampled_predictions.shape)
+        original_predictions = rearrange(original_predictions, 'b c h w-> (b h w) c')
+        sampled_predictions = rearrange(sampled_predictions, 'b c h w -> (b h w) c')
 
-    # calculate FID
-    
-    original_predictions = original_predictions.cpu().detach().numpy()
-    sampled_predictions = sampled_predictions.cpu().detach().numpy()
-    mu1 = np.mean(original_predictions, axis=0)
-    mu2 = np.mean(sampled_predictions, axis=0)
-    sigma1 = np.cov(original_predictions, rowvar=False)
-    sigma2 = np.cov(sampled_predictions, rowvar=False)
-    FID = np.sum((mu1 - mu2) ** 2) + np.trace(sigma1 + sigma2 - 2 * linalg.sqrtm(sigma1 @ sigma2))
+        # calculate FID
+        
+        original_predictions = original_predictions.cpu().detach().numpy()
+        sampled_predictions = sampled_predictions.cpu().detach().numpy()
+        mu1 = np.mean(original_predictions, axis=0)
+        mu2 = np.mean(sampled_predictions, axis=0)
+        sigma1 = np.cov(original_predictions, rowvar=False)
+        sigma2 = np.cov(sampled_predictions, rowvar=False)
+        FID = np.sum((mu1 - mu2) ** 2) + np.trace(sigma1 + sigma2 - 2 * linalg.sqrtm(sigma1 @ sigma2))
 
     return FID
 
 def point_fidelity(sampled_images, original_image):
     # F_p = mean(min(||sampled_pixel-original_pixel||^2))
     F_p = []
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    sampled_images = np.array(sampled_images) # b h w c
-    sampled_images = torch.tensor(sampled_images,device = device)
-    sampled_images = rearrange(sampled_images, 'b h w c -> (b h w) c')
-    original_image = torch.tensor(original_image,device = device) # h w c
-    for i in range(sampled_images.shape[0]):
-        sampled_image = sampled_images[i] # c
-        sampled_image = sampled_image.unsqueeze(0).unsqueeze(0) # 1 1 c
-        F_p.append((original_image - sampled_image).pow(2).min().item())
-    F_p = np.mean(F_p)
+    with torch.no_grad():
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        sampled_images = np.array(sampled_images) # b h w c
+        sampled_images = torch.tensor(sampled_images,device = device)
+        sampled_images = rearrange(sampled_images, 'b h w c -> (b h w) c')
+        original_image = torch.tensor(original_image,device = device) # h w c
+        for i in range(sampled_images.shape[0]):
+            sampled_image = sampled_images[i] # c
+            sampled_image = sampled_image.unsqueeze(0).unsqueeze(0) # 1 1 c
+            F_p.append((original_image - sampled_image).pow(2).min().item())
+        F_p = np.mean(F_p)
     return F_p
 
 def block_diversity(sampled_images, original_image):
