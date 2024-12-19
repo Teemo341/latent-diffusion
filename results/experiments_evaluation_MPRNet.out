@@ -1,10 +1,38 @@
-Salinas_Corrected
+Indian_Pines_Corrected
 /data_ssy/latent-diffusion/experiments/metric/evaluation.py:71: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   classifier.load_state_dict(torch.load(path))
-HUD
-IS ↑: 1.0486412048339844
-FID↓: 20.07857024644698
-F_p↓: 4.160845713113703e-12
-D_b↑: 42.58918380737305
+MPRNet
+IS ↑: 1.0400022268295288
+FID↓: 20.975756937740343
+F_p↓: 3.4123241805415407e-12
+D_b↑: 59.20936584472656
+spectral curve saved
+KSC_Corrected
+MPRNet
+IS ↑: 1.0021599531173706
+FID↓: 4.763713776323138
+F_p↓: 2.2783258596285422e-10
+D_b↑: 70.08998107910156
+spectral curve saved
+Pavia
+MPRNet
+IS ↑: 1.0435714721679688
+FID↓: 2.3668818243895284
+F_p↓: 1.1098910717063845e-11
+D_b↑: 58.708892822265625
+spectral curve saved
+PaviaU
+MPRNet
+IS ↑: 1.0360769033432007
+FID↓: 3.1293276772964598
+F_p↓: 1.0976915503178006e-11
+D_b↑: 73.88916778564453
+spectral curve saved
+Salinas_Corrected
+MPRNet
+IS ↑: 1.0036952495574951
+FID↓: 29.088989851271798
+F_p↓: 2.6410692662497613e-12
+D_b↑: 55.137298583984375
 spectral curve saved
 finished

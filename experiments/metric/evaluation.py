@@ -46,7 +46,7 @@ def load_original_HSI(dataset, path = None):
     return HSI
 
 def load_sampled_HSIs(algorithm, dataset, path = None):
-    if algorithm not in ["HUD", "GAN", "VAE", "MSCNN"]:
+    if algorithm not in ["HUD", "WGANGP", "VAE", "MPRNet"]:
         raise ValueError(f"algorithm {algorithm} not supported")
     if dataset not in ['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected']:
         raise ValueError(f"dataset {dataset} not supported")
