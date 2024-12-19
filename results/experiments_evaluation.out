@@ -1,7 +1,10 @@
-PaviaU
+Salinas_Corrected
 /data_ssy/latent-diffusion/experiments/metric/evaluation.py:71: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   classifier.load_state_dict(torch.load(path))
 HUD
-IS ↑: 1.0447462797164917
-FID↓: 3.569441201703591
-F_p↓: 1.0706142569705257e-11
+IS ↑: 1.0466707944869995
+FID↓: 19.89296697271694
+F_p↓: 4.052669658194397e-12
+D_b↑: 38.34638977050781
+spectral curve saved
+finished
