@@ -153,19 +153,23 @@ def block_diversity(sampled_images, original_image):
     D_b = []
     sampled_images = np.array(sampled_images) # b h w c
     original_image = np.array(original_image) # h w c
-    slide_h = original_image.shape[0]-sampled_images.shape[1]+1
-    slide_w = original_image.shape[1]-sampled_images.shape[2]+1
-    for sampled_image in sampled_images:
-        D_b_ = []
-        for k in range(4): # rotate 4 times, considering that the sampled image may be rotated
-            original_image_rotated = np.rot90(original_image, k)
-            for i in range(slide_h):
-                for j in range(slide_w):
-                    original_block = original_image_rotated[i:i+sampled_image.shape[0], j:j+sampled_image.shape[1]]
-                    D_b_.append(np.linalg.norm(sampled_image - original_block))
-        D_b.append(np.min(D_b_))
-    D_b = np.mean(D_b)
-    return D_b
+    with torch.no_grad():
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        original_image = torch.tensor(original_image,device = device) # h w c
+        for sampled_image in sampled_images:
+            D_b_ = []
+            for k in range(4): # rotate 4 times, considering that the sampled image may be rotated
+                sampled_image_rotated = np.rot90(sampled_image, k).copy() # h w c
+                sampled_image_rotated = torch.tensor(sampled_image_rotated,device = device) # h w c
+                slide_h = original_image.shape[0]-sampled_image_rotated.shape[0]+1
+                slide_w = original_image.shape[1]-sampled_image_rotated.shape[1]+1
+                for i in range(slide_h):
+                    for j in range(slide_w):
+                        original_block = original_image[i:i+sampled_image_rotated.shape[0], j:j+sampled_image_rotated.shape[1]]
+                        D_b_.append((original_block - sampled_image_rotated).pow(2).mean().item())
+            D_b.append(np.min(D_b_))
+        D_b = np.mean(D_b)
+        return D_b
 
 def spectral_curve_visualization(HSI,save_path=None):
     # HSI: h w c
@@ -180,6 +184,7 @@ def spectral_curve_visualization(HSI,save_path=None):
     for i in range(C.shape[0]):
         for j in range(C.shape[1]-1):
             C[i,j] = np.sum((y[j]<=HSI[:,x[i]]) * (HSI[:,x[i]]<=y[j+1]))
+    C = C / HSI.shape[0]
     
     #plot hotmap
     # C = np.sqrt(C) # augment color
@@ -192,6 +197,7 @@ def spectral_curve_visualization(HSI,save_path=None):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     plt.savefig(f"{save_path}/spectral_curve.png",dpi=100,bbox_inches='tight',pad_inches = 0)
+    plt.close()
     
  
 
@@ -247,5 +253,6 @@ if __name__ == "__main__":
                 f.write(f"FID↓: {FID}\n")
                 f.write(f"F_p↓: {F_p}\n")
                 f.write(f"D_b↑: {D_b}\n")
+        print('--------------------\n')
 
     print("finished")

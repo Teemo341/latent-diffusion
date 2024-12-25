@@ -10,4 +10,4 @@
 #SBATCH --gres=gpu:1
 #SBATCH -w node8
 
-python -u -m experiments.metric.evaluation --algorithms HUD --datasets KSC_Corrected --if_make_original_HSI False
+python -u -m experiments.metric.evaluation --metric spectral_curve --if_make_original_HSI False
