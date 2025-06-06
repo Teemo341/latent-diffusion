@@ -197,7 +197,7 @@ class VCA(pl.LightningModule):
         self.load_state_dict(sd, strict=False)
         print(f"Restored from {path}")
 
-    def encode_(self, x):
+    def encode_(self, x, softmax_transform_h = False):
         # https://github.com/isaacgerg/matlabHyperspectralToolbox/blob/master/hyperspectralToolbox/hyperFcls.m
         # %HYPERFCLS Performs fully constrained least squares on pixels of M.
         # % hyperFcls performs fully constrained least squares of each pixel in M
@@ -218,6 +218,7 @@ class VCA(pl.LightningModule):
         # % Chein-I Chang, and Mark L.G. Althouse. IEEE. 1999.
 
         b_, c_, h_, w_ = x.shape
+        x = x+1.0  # for unmixing, all members should be >0, so [-1,1]->[0,2]
         Y = rearrange(x, 'b c h w -> c (b h w)', b=b_, c=c_, h=h_, w=w_)
         [p1, N] = Y.shape
         [p2, q] = self.end_members.shape
@@ -259,10 +260,27 @@ class VCA(pl.LightningModule):
 
         c_ = self.out_channels
         z = rearrange(X, 'c (b h w) -> b c h w', b=b_, c=c_, h=h_, w=w_)
-        z = torch.clamp(z, -1, 1)
+        z = torch.clamp(z, 0, 1)
+        
+        if softmax_transform_h:
+            h = np.log(z.shape[1])+8
+            h = torch.tensor(h,device=z.device)
+            z = torch.log(z+torch.exp(-h))  
+
         return z
 
-    def encode(self, x):
+    def decode_(self, z, softmax_transform_h = False):
+        b_, c_, h_, w_ = z.shape
+        X = rearrange(z, 'b c h w -> c (b h w)', b=b_, c=c_, h=h_, w=w_)
+        if softmax_transform_h:
+            X = torch.nn.functional.softmax(X, dim=0)
+        Y = torch.matmul(self.end_members, X)
+        c_ = self.in_channels
+        dec = rearrange(Y, 'c (b h w) -> b c h w', b=b_, c=c_, h=h_, w=w_)
+        dec = dec-1.0  # for unmixing, return to [-1,1]
+        return dec
+
+    def encode(self, x, softmax_transform_h = False):
         # Y = Ae*X
         # Ae.T*Y = Ae.T*Ae*X
         # (Ae.T*Ae)**-1*Ae.T*Y = X
@@ -273,14 +291,25 @@ class VCA(pl.LightningModule):
         X_ = torch.matmul(torch.linalg.inv(torch.matmul(
             self.end_members.T, self.end_members)), torch.matmul(self.end_members.T, Y))
         c_ = self.out_channels
-        X_ = (X_-self.norm_mean.unsqueeze(1))/self.norm_std.unsqueeze(1) # normalize for ddpm
-        z = rearrange(X_, 'c (b h w) -> b c h w', b=b_, c=c_, h=h_, w=w_)
+
+        if softmax_transform_h:
+            z = rearrange(X_, 'c (b h w) -> b c h w', b=b_, c=c_, h=h_, w=w_)
+            z = torch.clamp(z, 0, None)
+            h = np.log(z.shape[1])+8
+            h = torch.tensor(h,device=z.device)
+            z = torch.log(z+torch.exp(-h))
+        else:
+            X_ = (X_-self.norm_mean.unsqueeze(1))/self.norm_std.unsqueeze(1) # normalize for ddpm
+            z = rearrange(X_, 'c (b h w) -> b c h w', b=b_, c=c_, h=h_, w=w_)
         return z
 
-    def decode(self, z):
+    def decode(self, z, softmax_transform_h = False):
         b_, c_, h_, w_ = z.shape
         X = rearrange(z, 'b c h w -> c (b h w)', b=b_, c=c_, h=h_, w=w_)
-        X = X*self.norm_std.unsqueeze(1)+self.norm_mean.unsqueeze(1) # denormalize for VCA
+        if softmax_transform_h:
+            X = torch.nn.functional.softmax(X, dim=0)
+        else:
+            X = X*self.norm_std.unsqueeze(1)+self.norm_mean.unsqueeze(1) # denormalize for VCA
         Y = torch.matmul(self.end_members, X)
         c_ = self.in_channels
         dec = rearrange(Y, 'c (b h w) -> b c h w', b=b_, c=c_, h=h_, w=w_)
@@ -356,6 +385,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Domain generalization')
     parser.add_argument('--data', type=str, help='allpy vca on which HSI data', choices=[
                         'Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected'])
+    parser.add_argument('--save', type = bool, default = True)
     parser.add_argument('--save_path', type=str,
                         default="./models/first_stage_models/HSI/VCA/")
     parser.add_argument('--feature_channels', type=int, default=20)
@@ -406,7 +436,8 @@ if __name__ == '__main__':
     image_ = torch.tensor(image_)
     image_ = image_[None, ...]  # bhwc
     image_ = rearrange(image_, 'b h w c -> b c h w')
-    z = model.encode(image_)
+    # z = model.encode_(image_, softmax_transform_h=True)
+    z = model.encode(image_, softmax_transform_h=False)
     print('abundance', z.shape)
 
     # distribution of abundance
@@ -428,7 +459,9 @@ if __name__ == '__main__':
     z_.save(args.save_path+args.data+"/abundance_image.png")
 
     # reconstruct image
-    rec = model.decode(z)
+    # rec = model.decode_(z, softmax_transform_h=True)
+    rec = model.decode(z, softmax_transform_h=False)
+    print('reconstruct mse', torch.nn.functional.mse_loss(image_, rec))
     rec = rearrange(rec, 'b c h w -> b h w c')
     rec = rec[0, :, :, :]
     print('resonstruct range', rec.min(), rec.max())

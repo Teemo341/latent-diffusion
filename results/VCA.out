@@ -1,15 +1,16 @@
-max value: 4096
-SNR estimated = 45.50722122192383[dB]
+max value: 8192
+SNR estimated = 33.905216217041016[dB]
 ... Select the projective proj.
 norm std Parameter containing:
-tensor([0.8163, 0.1682, 0.4876, 0.1981, 0.3054, 0.2256, 0.5632, 0.3863, 0.9393,
-        0.0608, 0.3807, 0.7632, 0.2502, 0.9061, 0.2419, 0.2089],
+tensor([0.3578, 0.3217, 0.2484, 0.3781, 0.1348, 0.2368, 0.2474, 0.2618, 0.2676,
+        0.3211, 0.3260, 0.2906, 0.2423, 0.2352, 0.3501, 0.3376],
        requires_grad=True)
-input range -1.0 1.0
-input (217, 217, 3)
-abundance torch.Size([1, 16, 217, 217])
-z value range tensor(-6.5521, grad_fn=<MinBackward1>) tensor(16.0017, grad_fn=<MaxBackward1>)
-resonstruct range tensor(-1.0113, grad_fn=<MinBackward1>) tensor(1.1085, grad_fn=<MaxBackward1>)
-resonstruct (217, 217, 3)
-random resonstruct range tensor(-4.6981, grad_fn=<MinBackward1>) tensor(5.6648, grad_fn=<MaxBackward1>)
+input range -0.7668457 1.0
+input (145, 145, 3)
+abundance torch.Size([1, 16, 145, 145])
+z value range tensor(-10.7726, grad_fn=<MinBackward1>) tensor(0.2179, grad_fn=<MaxBackward1>)
+reconstruct mse tensor(0.0078, grad_fn=<MseLossBackward0>)
+resonstruct range tensor(-0.7899, grad_fn=<MinBackward1>) tensor(1.0715, grad_fn=<MaxBackward1>)
+resonstruct (145, 145, 3)
+random resonstruct range tensor(-28.6157, grad_fn=<MinBackward1>) tensor(26.5547, grad_fn=<MaxBackward1>)
 finished

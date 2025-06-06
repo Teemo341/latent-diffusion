@@ -132,7 +132,7 @@ def Frechet_Inception_Distance(classifier, sampled_images, original_image):
 
     return FID
 
-def point_fidelity(sampled_images, original_image):
+def point_fidelity(sampled_images, original_image, type = 'cos'):
     # F_p = mean(min(||sampled_pixel-original_pixel||^2))
     F_p = []
     with torch.no_grad():
@@ -140,15 +140,23 @@ def point_fidelity(sampled_images, original_image):
         sampled_images = np.array(sampled_images) # b h w c
         sampled_images = torch.tensor(sampled_images,device = device)
         sampled_images = rearrange(sampled_images, 'b h w c -> (b h w) c')
+        if type == 'cos':
+            sampled_images = sampled_images/sampled_images.norm(dim = -1, keepdim = True)
+        # sampled_images.to('cpu')
         original_image = torch.tensor(original_image,device = device) # h w c
+        if type == 'cos':
+            original_image = original_image/original_image.norm(dim = -1, keepdim = True)
         for i in range(sampled_images.shape[0]):
-            sampled_image = sampled_images[i] # c
+            sampled_image = sampled_images[i].to(device) # c
             sampled_image = sampled_image.unsqueeze(0).unsqueeze(0) # 1 1 c
-            F_p.append((original_image - sampled_image).pow(2).min().item())
+            if type == 'mse':
+                F_p.append((original_image - sampled_image).pow(2).min().item()) # mse way
+            elif type == 'cos':
+                F_p.append((original_image*sampled_image).sum(dim=-1).max().item()) # cos similarity
         F_p = np.mean(F_p)
     return F_p
 
-def block_diversity(sampled_images, original_image):
+def block_diversity(sampled_images, original_image, type = 'cos'):
     # D_b = mean(min(||sampled_block-original_block||^2))
     D_b = []
     sampled_images = np.array(sampled_images) # b h w c
@@ -161,13 +169,22 @@ def block_diversity(sampled_images, original_image):
             for k in range(4): # rotate 4 times, considering that the sampled image may be rotated
                 sampled_image_rotated = np.rot90(sampled_image, k).copy() # h w c
                 sampled_image_rotated = torch.tensor(sampled_image_rotated,device = device) # h w c
+                if type == 'cos':
+                    sampled_image_rotated = sampled_image_rotated/sampled_image_rotated.norm(dim = -1, keepdim = True)
                 slide_h = original_image.shape[0]-sampled_image_rotated.shape[0]+1
                 slide_w = original_image.shape[1]-sampled_image_rotated.shape[1]+1
                 for i in range(slide_h):
                     for j in range(slide_w):
                         original_block = original_image[i:i+sampled_image_rotated.shape[0], j:j+sampled_image_rotated.shape[1]]
-                        D_b_.append((original_block - sampled_image_rotated).pow(2).mean().item())
-            D_b.append(np.min(D_b_))
+                        if type == 'mse':
+                            D_b_.append((original_block - sampled_image_rotated).pow(2).mean().item()) # mse way
+                        elif type == 'cos':
+                            original_block = original_block/original_block.norm(dim = -1, keepdim = True)
+                            D_b_.append((original_block*sampled_image_rotated).sum(dim=-1).mean().item()) # cos similarity
+            if type == 'mse':
+                D_b.append(np.min(D_b_))
+            elif type == 'cos':
+                D_b.append(np.max(D_b_))
         D_b = np.mean(D_b)
         return D_b
 
@@ -184,12 +201,12 @@ def spectral_curve_visualization(HSI,save_path=None):
     for i in range(C.shape[0]):
         for j in range(C.shape[1]-1):
             C[i,j] = np.sum((y[j]<=HSI[:,x[i]]) * (HSI[:,x[i]]<=y[j+1]))
-    C = C / HSI.shape[0]
     
     #plot hotmap
     # C = np.sqrt(C) # augment color
+    # C = np.log1p(C)
     plt.figure(figsize=(3,3))
-    plt.imshow(C.T,aspect='auto',cmap='jet',origin = 'lower')
+    plt.imshow(C.T,aspect='auto',cmap='jet',origin = 'lower', vmax = C.max()*0.4)
     plt.yticks([0,25,50,75],[0.0,0.25,0.5,0.75])
     
     if save_path is None:
@@ -234,10 +251,10 @@ if __name__ == "__main__":
                 print(f"FID↓: {FID}")
             if "F_p" in args.metric:
                 F_p = point_fidelity(sampled_images, original_image)
-                print(f"F_p↓: {F_p}")
+                print(f"F_p↑: {F_p}")
             if "D_b" in args.metric:
                 D_b = block_diversity(sampled_images, original_image)
-                print(f"D_b↑: {D_b}")
+                print(f"D_b↓: {D_b}")
             if "spectral_curve" in args.metric:
                 spectral_curve_visualization(original_image, f'./experiments/metric/original_image/{dataset}')
                 sampled_images_ = np.array(sampled_images)
@@ -251,8 +268,8 @@ if __name__ == "__main__":
             with open(f'{txt_path}/metric.txt','w') as f:
                 f.write(f"IS↑ : {IS}\n")
                 f.write(f"FID↓: {FID}\n")
-                f.write(f"F_p↓: {F_p}\n")
-                f.write(f"D_b↑: {D_b}\n")
+                f.write(f"F_p↑: {F_p}\n")
+                f.write(f"D_b↓: {D_b}\n")
         print('--------------------\n')
 
     print("finished")

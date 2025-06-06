@@ -938,7 +938,7 @@ class LatentDiffusion(DDPM):
         loss = self(x, c)
         return loss
 
-    def forward(self, x, c, *args, **kwargs):
+    def forward(self, x, c=None, *args, **kwargs):
         t = torch.randint(0, self.num_timesteps,
                           (x.shape[0],), device=self.device).long()
         if self.model.conditioning_key is not None:

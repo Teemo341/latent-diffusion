@@ -1,6 +1,6 @@
 #! /bin/bash
 #SBATCH -J evaluation
-#SBATCH -o ./results/experiments_evaluation_HUD.out
+#SBATCH -o ./results/experiments_evaluation.out
 #SBATCH -p compute1
 #SBATCH -A compute1
 #SBATCH --qos=compute1
@@ -10,4 +10,4 @@
 #SBATCH --gres=gpu:1
 #SBATCH -w node8
 
-python -u -m experiments.metric.evaluation --metric spectral_curve --if_make_original_HSI False
+python -u -m experiments.metric.evaluation --metric F_p D_b --if_make_original_HSI False

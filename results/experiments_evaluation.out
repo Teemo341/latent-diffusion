@@ -1,10 +1,78 @@
-Salinas_Corrected
+Indian_Pines_Corrected
 /data_ssy/latent-diffusion/experiments/metric/evaluation.py:71: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   classifier.load_state_dict(torch.load(path))
+WGANGP
+F_p↑: 0.9985644935295568
+D_b↓: 0.9850333258509636
 HUD
-IS ↑: 1.0486412048339844
-FID↓: 20.07857024644698
-F_p↓: 4.160845713113703e-12
-D_b↑: 42.58918380737305
-spectral curve saved
+F_p↑: 0.9992000248385011
+D_b↓: 0.9863360747694969
+VAE
+F_p↑: 0.914087688732252
+D_b↓: 0.8096764981746674
+MPRNet
+F_p↑: 0.9961203531856881
+D_b↓: 0.9857032001018524
+--------------------
+
+KSC_Corrected
+WGANGP
+F_p↑: 0.9987803789554164
+D_b↓: 0.9360934346914291
+HUD
+F_p↑: 0.9998835417281953
+D_b↓: 0.9908815249800682
+VAE
+F_p↑: 0.9994421082956251
+D_b↓: 0.9788255766034126
+MPRNet
+F_p↑: 0.9992006724496605
+D_b↓: 0.983563981950283
+--------------------
+
+Pavia
+WGANGP
+F_p↑: 0.9960810321899771
+D_b↓: 0.8490990996360779
+HUD
+F_p↑: 0.9991459061493515
+D_b↓: 0.9121672064065933
+VAE
+F_p↑: 0.9991445859029356
+D_b↓: 0.9360811795507159
+MPRNet
+F_p↑: 0.9992604267099523
+D_b↓: 0.9428351074457169
+--------------------
+
+PaviaU
+WGANGP
+F_p↑: 0.9969299421645701
+D_b↓: 0.9488866627216339
+HUD
+F_p↑: 0.9988318255636841
+D_b↓: 0.9199051037430763
+VAE
+F_p↑: 0.9993199872697005
+D_b↓: 0.9138759076595306
+MPRNet
+F_p↑: 0.9974164336381364
+D_b↓: 0.8841043040156364
+--------------------
+
+Salinas_Corrected
+WGANGP
+F_p↑: 0.9952995833082241
+D_b↓: 0.9635953158140182
+HUD
+F_p↑: 0.9997141299390933
+D_b↓: 0.9914386048913002
+VAE
+F_p↑: 0.9986728258882067
+D_b↓: 0.9714158475399017
+MPRNet
+F_p↑: 0.9983037838610471
+D_b↓: 0.9875963479280472
+--------------------
+
 finished

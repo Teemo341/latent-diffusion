@@ -2,57 +2,46 @@ Indian_Pines_Corrected
 /data_ssy/latent-diffusion/experiments/metric/evaluation.py:71: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
   classifier.load_state_dict(torch.load(path))
 WGANGP
+whether the sum of visualizaiton = 1:  199.9801664684899
+whether the sum of visualizaiton = 1:  199.9996337890625
 spectral curve saved
 HUD
+whether the sum of visualizaiton = 1:  199.9801664684899
+whether the sum of visualizaiton = 1:  199.9874267578125
 spectral curve saved
 VAE
+whether the sum of visualizaiton = 1:  199.9801664684899
+whether the sum of visualizaiton = 1:  200.0001220703125
 spectral curve saved
 MPRNet
+whether the sum of visualizaiton = 1:  199.9801664684899
+whether the sum of visualizaiton = 1:  200.00048828125
 spectral curve saved
 --------------------
 
 KSC_Corrected
 WGANGP
+whether the sum of visualizaiton = 1:  176.51151275634766
+whether the sum of visualizaiton = 1:  176.0003662109375
 spectral curve saved
 HUD
+whether the sum of visualizaiton = 1:  176.51151275634766
+whether the sum of visualizaiton = 1:  176.0006103515625
 spectral curve saved
 VAE
+whether the sum of visualizaiton = 1:  176.51151275634766
+whether the sum of visualizaiton = 1:  176.0001220703125
 spectral curve saved
 MPRNet
+whether the sum of visualizaiton = 1:  176.51151275634766
+whether the sum of visualizaiton = 1:  175.99755859375
 spectral curve saved
 --------------------
 
 Pavia
 WGANGP
+whether the sum of visualizaiton = 1:  101.32351508631228
+whether the sum of visualizaiton = 1:  101.9393310546875
 spectral curve saved
 HUD
-spectral curve saved
-VAE
-spectral curve saved
-MPRNet
-spectral curve saved
---------------------
-
-PaviaU
-WGANGP
-spectral curve saved
-HUD
-spectral curve saved
-VAE
-spectral curve saved
-MPRNet
-spectral curve saved
---------------------
-
-Salinas_Corrected
-WGANGP
-spectral curve saved
-HUD
-spectral curve saved
-VAE
-spectral curve saved
-MPRNet
-spectral curve saved
---------------------
-
-finished
+slurmstepd: error: *** JOB 32715 ON node8 CANCELLED AT 2025-01-21T14:16:20 ***
