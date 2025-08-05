@@ -9,4 +9,4 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --gres=gpu:2
 
-python -u main_HSI.py --base configs/HSI-VCA/PaviaU-ldm-VCA.yaml -t --gpus 0,1
+python -u main_HSI.py --logdir logs/PaviaU --base configs/HSI-VCA/PaviaU-ldm-VCA.yaml -t --gpus 0,1

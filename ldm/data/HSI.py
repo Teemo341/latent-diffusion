@@ -47,6 +47,7 @@ class HSIBase(Dataset):
         else:
             self.augment_method = None
         assert self.size ==None or (self.size <= self.whole_image.shape[0] and self.size <= self.whole_image.shape[1])
+        self.__len__() # initialize length
 
     def read_data(self, data_root):
         # read the whole HSI image,reutrun h*w*c, 20*20*200 for example

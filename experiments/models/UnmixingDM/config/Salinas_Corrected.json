@@ -1,11 +1,13 @@
 {
-    "name": "Indian_Pines_Corrected",
+    "name": "Salinas_Corrected",
+    "AE_name": "UnmixingAE",
+    "save_dir": "experiments/models/checkpoints/UnmixDiff/",
     "phase": "train", // train or val
     "gpu_ids": [
         1
     ],
     "path": { //set the path
-        "log": "logs",
+        "log": "logs/unmixdiff/dm",
         "tb_logger": "tb_logger",
         "results": "results",
         "mat_results": "mat_results",
@@ -55,7 +57,7 @@
             }
         },
         "diffusion": {
-            "image_size": 256,
+            "image_size": 32,
             "channels": 5, //sample channel
             "conditional": false // unconditional generation
         }
