@@ -20,6 +20,8 @@ class HSIBase(Dataset):
                  split_rate = 0.8,
                  value_range = None,
                  augment = True,
+                 max_len=5000,
+                 seed=42
                  ):
         #data_root: dir of .mat file
         #size: hw, None means whole image
@@ -38,6 +40,8 @@ class HSIBase(Dataset):
         self.size = size
         self.split = split
         self.split_rate = split_rate
+        self.max_len = max_len
+        self.seed = seed
         if augment:
             self.augment_method = transforms.Compose([
                 transforms.RandomHorizontalFlip(0.5),
@@ -61,17 +65,24 @@ class HSIBase(Dataset):
         # calculate the center pixel numbers (w-size+1)*(h-size+1)
         if self.size == None:
             return 1
+        h, w, c = self.whole_image.shape
+        length = (w-self.size+1)*(h-self.size+1)
+        if length > self.max_len:
+            self.indices = np.linspace(0, length-1, num=self.max_len, dtype=int).tolist()
+            length = self.max_len
         else:
-            h, w, c = self.whole_image.shape
-            length = (w-self.size+1)*(h-self.size+1)
-            if not self.split:
-                return length
-            else:
-                if self.split == 'train':
-                    return int(length*self.split_rate)
-                elif self.split == 'valid':
-                    self.drop_length = int(length*self.split_rate)
-                    return length - self.drop_length
+            self.indices = list(range(length)) # all indices
+        random.seed(self.seed)
+        self.indices = random.sample(self.indices, length) # shuffle indices
+        
+        if not self.split:
+            return length
+        else:
+            if self.split == 'train':
+                return int(length*self.split_rate)
+            elif self.split == 'valid':
+                self.drop_length = int(length*self.split_rate)
+                return length - self.drop_length
 
     def __getitem__(self, i):
         example = dict()
@@ -81,6 +92,7 @@ class HSIBase(Dataset):
         else:
             if self.split == 'valid':
                 i = i+ self.drop_length
+            i = self.indices[i]
             h, w, c = self.whole_image.shape
             w_ = w-self.size+1
             image_start_point_h = int(i//w_)

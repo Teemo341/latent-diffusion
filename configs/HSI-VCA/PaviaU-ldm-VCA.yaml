@@ -10,7 +10,7 @@ model:
     loss_type: l2
     first_stage_key: "image"
     cond_stage_key: "image"
-    image_size: 32
+    image_size: 128
     channels: 9
     cond_stage_trainable: False
     concat_mode: False
@@ -25,18 +25,18 @@ model:
         cycle_lengths: [10000000000000]
         f_start: [1.e-6]
         f_max: [1.]
-        f_min: [ 1.]
+        f_min: [ 0.01]
 
     unet_config:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
-        image_size: 32
+        image_size: 128
         in_channels: 9
         out_channels: 9
-        model_channels: 192
-        attention_resolutions: [ 1, 2, 4, 8 ]   # 32, 16, 8, 4
+        model_channels: 320
+        attention_resolutions: [ 4, 8 ]
         num_res_blocks: 2
-        channel_mult: [ 1,2,2,4,4 ]  # 32, 16, 8, 4, 2
+        channel_mult: [ 1,2,4,4 ]  # 1 2 4 8
         num_heads: 8
         use_scale_shift_norm: True
         resblock_updown: True
@@ -53,24 +53,24 @@ model:
 data:
   target: main_HSI.DataModuleFromConfig
   params:
-    batch_size: 32
-    num_workers: 5
+    batch_size: 5
+    num_workers: 4
     wrap: False
     train:
       target: ldm.data.HSI.PaviaU_train
       params:
-        size: 32
+        size: 128
     validation:
       target: ldm.data.HSI.PaviaU_valid
       params:
-        size: 32
+        size: 128
 
 lightning:
   callbacks:
     image_logger:
       target: main_HSI.ImageLogger_HSI
       params:
-        batch_frequency: 2000
+        batch_frequency: 800
         max_images: 8
         increase_log_steps: False
         visual_channels: [46,27,10]
@@ -80,9 +80,8 @@ lightning:
           plot_denoise_rows : False
           plot_progressive_rows : True
           plot_diffusion_rows : True
-          plot_latent : False
 
 
   trainer:
     benchmark: True
-    max_epochs: 10
+    max_epochs: 10000

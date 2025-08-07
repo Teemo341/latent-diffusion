@@ -42,14 +42,11 @@ def make_original_HSI(dataset, path = None):
 def load_original_HSI(dataset, path = None):
     if path is None:
         path = f'./experiments/metric/original_image/{dataset}/hsi.npy'
+    assert os.path.exists(path), f"Original HSI not found at {path}"
     HSI = np.load(path)
     return HSI
 
 def load_sampled_HSIs(algorithm, dataset, path = None):
-    if algorithm not in ["HUD", "WGANGP", "VAE", "MPRNet"]:
-        raise ValueError(f"algorithm {algorithm} not supported")
-    if dataset not in ['Indian_Pines_Corrected', 'KSC_Corrected', 'Pavia', 'PaviaU', 'Salinas_Corrected']:
-        raise ValueError(f"dataset {dataset} not supported")
     
     sampled_HSI = []
     
@@ -61,6 +58,7 @@ def load_sampled_HSIs(algorithm, dataset, path = None):
     else:
         HSI = np.load(path)
         sampled_HSI.append(HSI)
+    assert len(sampled_HSI) > 0, f"No sampled HSI found for {algorithm} on {dataset}"
     return sampled_HSI
 
 def load_classifier(dataset, path = None):

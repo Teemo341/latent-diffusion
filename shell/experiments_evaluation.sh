@@ -10,4 +10,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH -w node8
 
-python -u -m experiments.metric.evaluation --metric F_p D_b --if_make_original_HSI False
+metric="IS FID F_p D_b spectral_curve"
+datasets="Indian_Pines_Corrected KSC_Corrected Pavia PaviaU Salinas_Corrected"
+algorithms="UnmixDiff"
+
+python -u -m experiments.metric.evaluation \
+    --metric $metric \
+    --if_make_original_HSI False \
+    --algorithms $algorithms \
