@@ -3,7 +3,7 @@ import math
 import numpy as np
 import cv2
 from torchvision.utils import make_grid
-from skimage.measure import compare_psnr, compare_ssim
+# from skimage.measure import compare_psnr, compare_ssim
 import scipy.io as sio
 
 

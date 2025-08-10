@@ -15,7 +15,8 @@ class HSIBase(Dataset):
     def __init__(self,
                  data_root,
                  label_root,
-                 size=None,
+                 visual_channels= [0, 1, 2],
+                 image_size=None,
                  split = None,
                  split_rate = 0.8,
                  value_range = None,
@@ -24,7 +25,7 @@ class HSIBase(Dataset):
                  seed=42
                  ):
         #data_root: dir of .mat file
-        #size: hw, None means whole image
+        #image_size: hw, None means whole image
         #split: 'train' means training dataset , 'valid' means validation, None means all for training.
         #split_rate: how many images for training
     
@@ -37,7 +38,8 @@ class HSIBase(Dataset):
             self.max_value = self.whole_image.max()
         self.mean_value = self.whole_image.mean()
         self.max_diver = max(self.max_value-self.mean_value, self.mean_value)
-        self.size = size
+        self.visual_channels = visual_channels
+        self.image_size = image_size
         self.split = split
         self.split_rate = split_rate
         self.max_len = max_len
@@ -50,7 +52,7 @@ class HSIBase(Dataset):
             ])
         else:
             self.augment_method = None
-        assert self.size ==None or (self.size <= self.whole_image.shape[0] and self.size <= self.whole_image.shape[1])
+        assert self.image_size ==None or (self.image_size <= self.whole_image.shape[0] and self.image_size <= self.whole_image.shape[1])
         self.__len__() # initialize length
 
     def read_data(self, data_root):
@@ -62,11 +64,11 @@ class HSIBase(Dataset):
         return np.array(torch.randn(20, 20, 17))
 
     def __len__(self):
-        # calculate the center pixel numbers (w-size+1)*(h-size+1)
-        if self.size == None:
+        # calculate the center pixel numbers (w-image_size+1)*(h-image_size+1)
+        if self.image_size == None:
             return 1
         h, w, c = self.whole_image.shape
-        length = (w-self.size+1)*(h-self.size+1)
+        length = (w-self.image_size+1)*(h-self.image_size+1)
         if length > self.max_len:
             self.indices = np.linspace(0, length-1, num=self.max_len, dtype=int).tolist()
             length = self.max_len
@@ -86,7 +88,7 @@ class HSIBase(Dataset):
 
     def __getitem__(self, i):
         example = dict()
-        if self.size == None:
+        if self.image_size == None:
             image = self.whole_image
             label = self.whole_label
         else:
@@ -94,11 +96,11 @@ class HSIBase(Dataset):
                 i = i+ self.drop_length
             i = self.indices[i]
             h, w, c = self.whole_image.shape
-            w_ = w-self.size+1
+            w_ = w-self.image_size+1
             image_start_point_h = int(i//w_)
             image_start_point_w = int(i%w_)
-            image = self.whole_image[image_start_point_h:(image_start_point_h+self.size),image_start_point_w:(image_start_point_w+self.size),:]
-            label = self.whole_label[image_start_point_h:(image_start_point_h+self.size),image_start_point_w:(image_start_point_w+self.size),:]
+            image = self.whole_image[image_start_point_h:(image_start_point_h+self.image_size),image_start_point_w:(image_start_point_w+self.image_size),:]
+            label = self.whole_label[image_start_point_h:(image_start_point_h+self.image_size),image_start_point_w:(image_start_point_w+self.image_size),:]
 
         # default to score-sde preprocessing
         img = np.array(image)
@@ -129,6 +131,7 @@ class HSIBase(Dataset):
         # diver = self.max_diver/self.max_value
         # example["image"] = ((image/255-mean)/diver).astype(np.float32)
         example["image"] = (image/127.5-1).astype(np.float32)
+        example["rgb_image"] = example["image"][:, :, self.visual_channels]
         example["label"] = np.array(label).astype(np.float32)
         return example
     
@@ -138,7 +141,7 @@ class HSIBase(Dataset):
 
 class Indian_Pines_Corrected(HSIBase):
     def __init__(self, **kwargs):
-        super().__init__(data_root="data/HSI/Indian_pines_corrected.mat", label_root="data/HSI/Indian_pines_gt.mat",value_range=8192, **kwargs)
+        super().__init__(data_root="data/HSI/Indian_pines_corrected.mat", label_root="data/HSI/Indian_pines_gt.mat", visual_channels= [36,17,11], value_range=8192, **kwargs)
 
     def read_data(self, data_root):
         whole_image = loadmat(data_root)["indian_pines_corrected"]
@@ -163,7 +166,7 @@ class Indian_Pines_Corrected_valid(Indian_Pines_Corrected):
 
 class KSC_Corrected(HSIBase):
     def __init__(self, **kwargs):
-        super().__init__(data_root="data/HSI/KSC_corrected.mat", label_root="data/HSI/KSC_gt.mat",value_range=512, **kwargs)
+        super().__init__(data_root="data/HSI/KSC_corrected.mat", label_root="data/HSI/KSC_gt.mat", visual_channels=[28,9,10] ,value_range=512, **kwargs)
 
     def read_data(self, data_root):
         whole_image = loadmat(data_root)['KSC']
@@ -188,7 +191,7 @@ class KSC_Corrected_valid(KSC_Corrected):
 
 class Pavia(HSIBase):
     def __init__(self, **kwargs):
-        super().__init__(data_root="data/HSI/Pavia.mat", label_root="data/HSI/Pavia_gt.mat",value_range=4096, **kwargs)
+        super().__init__(data_root="data/HSI/Pavia.mat", label_root="data/HSI/Pavia_gt.mat", visual_channels=[46,27,10], value_range=4096, **kwargs)
 
     def read_data(self, data_root):
         whole_image = loadmat(data_root)['pavia']
@@ -213,7 +216,7 @@ class Pavia_valid(Pavia):
 
 class PaviaU(HSIBase):
     def __init__(self, **kwargs):
-        super().__init__(data_root="data/HSI/PaviaU.mat", label_root="data/HSI/PaviaU_gt.mat",value_range=4096, **kwargs)
+        super().__init__(data_root="data/HSI/PaviaU.mat", label_root="data/HSI/PaviaU_gt.mat", visual_channels=[46,27,10], value_range=4096, **kwargs)
 
     def read_data(self, data_root):
         whole_image = loadmat(data_root)['paviaU']
@@ -239,7 +242,7 @@ class PaviaU_valid(PaviaU):
 
 class Salinas_Corrected(HSIBase):
     def __init__(self, **kwargs):
-        super().__init__(data_root="data/HSI/Salinas_corrected.mat", label_root="data/HSI/Salinas_gt.mat",value_range=4096, **kwargs)
+        super().__init__(data_root="data/HSI/Salinas_corrected.mat", label_root="data/HSI/Salinas_gt.mat", visual_channels=[36,17,11] ,value_range=4096, **kwargs)
 
     def read_data(self, data_root):
         whole_image = loadmat(data_root)['salinas_corrected']
@@ -270,18 +273,18 @@ if __name__=='__main__':
     # plt.hist(image, bins=40, facecolor="blue", edgecolor="black", alpha=0.7)
     # plt.savefig('here.png')
 
-    a = Indian_Pines_Corrected(size = 32)
+    a = Indian_Pines_Corrected(image_size = 32)
     print(a[0]['image'].shape)
     print(a[0]['label'].shape)
-    a = KSC_Corrected(size = 32)
+    a = KSC_Corrected(image_size = 32)
     print(a[0]['image'].shape)
     print(a[0]['label'].shape)
-    a = Pavia(size = 32)
+    a = Pavia(image_size = 32)
     print(a[0]['image'].shape)
     print(a[0]['label'].shape)
-    a = PaviaU(size = 32)
+    a = PaviaU(image_size = 32)
     print(a[0]['image'].shape)
     print(a[0]['label'].shape)
-    a = Salinas_Corrected(size = 32)
+    a = Salinas_Corrected(image_size = 32)
     print(a[0]['image'].shape)
     print(a[0]['label'].shape)

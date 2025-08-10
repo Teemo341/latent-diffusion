@@ -32,7 +32,7 @@ def main():
     train_parser.add_argument("--cuda", type=int, required=False,default=1,
                               help="set it to 1 for running on GPU, 0 for CPU")
     train_parser.add_argument("--batch_size", type=int, default=16, help="batch size, default set to 64")
-    train_parser.add_argument("--size", type=int, default=128, help="spatial size, default set to 256")
+    train_parser.add_argument("--image_size", type=int, default=128, help="spatial size, default set to 256")
     train_parser.add_argument("--epochs", type=int, default=40, help="epochs, default set to 20")
     train_parser.add_argument("--n_blocks", type=int, default=3, help="n_blocks, default set to 6")
     train_parser.add_argument("--dataset_name", type=str, default="Chikusei", help="dataset_name, default set to dataset_name")
@@ -52,7 +52,7 @@ def main():
     infer_parser.add_argument("--n_blocks", type=int, default=3, help="n_blocks, default set to 6")
     infer_parser.add_argument("--save_dir", type=str, default="./experiments/unmixing/ckpts/", help="dataset_name, default set to dataset_name")
     infer_parser.add_argument("--dataset_name", type=str, default="Chikusei", help="dataset_name, default set to dataset_name")
-    infer_parser.add_argument("--size", type=int, default=128, help="spatial size, default set to 256")
+    infer_parser.add_argument("--image_size", type=int, default=128, help="spatial size, default set to 256")
     infer_parser.add_argument("--max_num", type=int, default=5000, help="max number of samples to infer, default set to 5000")
     infer_parser.add_argument("--model_title", type=str, default="UnmixingAE", help="model_title, default set to model_title")
 
@@ -188,20 +188,20 @@ def train(args):
 
 def get_dataset(args):
     if args.dataset_name=="Indian_Pines_Corrected":
-        train_set = Indian_Pines_Corrected_train(size=args.size)
-        eval_set = Indian_Pines_Corrected_valid(size=args.size)
+        train_set = Indian_Pines_Corrected_train(image_size=args.image_size)
+        eval_set = Indian_Pines_Corrected_valid(image_size=args.image_size)
     elif args.dataset_name=="KSC_Corrected":
-        train_set = KSC_Corrected_train(size=args.size)
-        eval_set = KSC_Corrected_valid(size=args.size)
+        train_set = KSC_Corrected_train(image_size=args.image_size)
+        eval_set = KSC_Corrected_valid(image_size=args.image_size)
     elif args.dataset_name=="Pavia":
-        train_set = Pavia_train(size=args.size)
-        eval_set = Pavia_valid(size=args.size)
+        train_set = Pavia_train(image_size=args.image_size)
+        eval_set = Pavia_valid(image_size=args.image_size)
     elif args.dataset_name=="PaviaU":
-        train_set = PaviaU_train(size=args.size)
-        eval_set = PaviaU_valid(size=args.size)
+        train_set = PaviaU_train(image_size=args.image_size)
+        eval_set = PaviaU_valid(image_size=args.image_size)
     elif args.dataset_name=="Salinas_Corrected":
-        train_set = Salinas_Corrected_train(size=args.size)
-        eval_set = Salinas_Corrected_valid(size=args.size)
+        train_set = Salinas_Corrected_train(image_size=args.image_size)
+        eval_set = Salinas_Corrected_valid(image_size=args.image_size)
     else:
         raise ValueError("dataset_name not supported")
 
@@ -228,7 +228,7 @@ def sum_dict(a, b):
 
 def adjust_learning_rate(start_lr, optimizer, epoch):
     """Sets the learning rate to the initial LR decayed by 10 every 50 epochs"""
-    lr = start_lr * (0.1 ** (epoch // 30))
+    lr = start_lr * (0.5 ** (epoch // 40))
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
 
@@ -254,7 +254,7 @@ def validate(args, loader, model, criterion):
     return epoch_meter.value()[0]
 
 def infer(args):
-    result_path=os.path.join(args.save_dir, "inferred_abu/", f"{args.size}", args.model_title + "_" + args.dataset_name + '/')
+    result_path=os.path.join(args.save_dir, "inferred_abu/", f"{args.image_size}", args.model_title + "_" + args.dataset_name + '/')
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 

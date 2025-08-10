@@ -5,7 +5,7 @@ model:
     linear_start: 0.0015
     linear_end: 0.0155
     num_timesteps_cond: 1
-    log_every_t: 100
+    log_every_t: 200
     timesteps: 1000
     loss_type: l2
     first_stage_key: "image"
@@ -15,7 +15,7 @@ model:
     cond_stage_trainable: False
     concat_mode: False
     scale_by_std: False
-    scale_factor : 10.0
+    scale_factor: 1.011
     monitor: 'val/loss_simple_ema'
 
     scheduler_config: # 10000 warmup steps
@@ -59,11 +59,11 @@ data:
     train:
       target: ldm.data.HSI.Salinas_Corrected_train
       params:
-        size: 128
+        image_size: 128
     validation:
       target: ldm.data.HSI.Salinas_Corrected_valid
       params:
-        size: 128
+        image_size: 128
 
 lightning:
   callbacks:

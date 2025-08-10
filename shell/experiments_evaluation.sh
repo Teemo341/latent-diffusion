@@ -12,7 +12,7 @@
 
 metric="IS FID F_p D_b spectral_curve"
 datasets="Indian_Pines_Corrected KSC_Corrected Pavia PaviaU Salinas_Corrected"
-algorithms="UnmixDiff"
+algorithms="Unmixbeforefusion"
 
 python -u -m experiments.metric.evaluation \
     --metric $metric \

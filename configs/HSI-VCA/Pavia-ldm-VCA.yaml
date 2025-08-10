@@ -59,11 +59,11 @@ data:
     train:
       target: ldm.data.HSI.Pavia_train
       params:
-        size: 128
+        image_size: 128
     validation:
       target: ldm.data.HSI.Pavia_valid
       params:
-        size: 128
+        image_size: 128
 
 lightning:
   callbacks:

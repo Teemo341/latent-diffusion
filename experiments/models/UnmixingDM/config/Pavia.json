@@ -57,7 +57,7 @@
             }
         },
         "diffusion": {
-            "image_size": 32,
+            "image_size": 128,
             "channels": 5, //sample channel
             "conditional": false // unconditional generation
         }

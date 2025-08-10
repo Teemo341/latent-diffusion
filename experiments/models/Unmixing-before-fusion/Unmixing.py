@@ -16,7 +16,7 @@ from tensorboardX import SummaryWriter
 from unmixingmodel.unmixingAE import UnmixingAE
 from core import utils
 from core.common import *
-from core.loaddata import HSIDataset
+from ldm.data.HSI import *
 from core.loss import reconstruction_SADloss,CharbonnierLoss,TVLossEndmembers
 from core.metrics import quality_assessment
 
@@ -32,7 +32,7 @@ def main():
     train_parser.add_argument("--cuda", type=int, required=False,default=1,
                               help="set it to 1 for running on GPU, 0 for CPU")
     train_parser.add_argument("--batch_size", type=int, default=16, help="batch size, default set to 64")
-    train_parser.add_argument("--n_feats", type=int, default=128, help="n_feats, default set to 256")
+    train_parser.add_argument("--image_size", type=int, default=128, help="spatial size, default set to 256")
     train_parser.add_argument("--epochs", type=int, default=40, help="epochs, default set to 20")
     train_parser.add_argument("--n_blocks", type=int, default=3, help="n_blocks, default set to 6")
     train_parser.add_argument("--dataset_name", type=str, default="Chikusei", help="dataset_name, default set to dataset_name")
@@ -50,8 +50,10 @@ def main():
                              help="set it to 1 for running on GPU, 0 for CPU")
     infer_parser.add_argument("--gpus", type=str, default="0", help="gpu ids (default: 7)")
     infer_parser.add_argument("--n_blocks", type=int, default=3, help="n_blocks, default set to 6")
-    infer_parser.add_argument("--ckpt_dir", type=str, default="./experiments/unmixing/ckpts/", help="dataset_name, default set to dataset_name")
+    infer_parser.add_argument("--save_dir", type=str, default="./experiments/unmixing/ckpts/", help="dataset_name, default set to dataset_name")
     infer_parser.add_argument("--dataset_name", type=str, default="Chikusei", help="dataset_name, default set to dataset_name")
+    infer_parser.add_argument("--image_size", type=int, default=128, help="spatial size, default set to 256")
+    infer_parser.add_argument("--max_num", type=int, default=5000, help="max number of samples to infer, default set to 5000")
     infer_parser.add_argument("--model_title", type=str, default="UnmixingAE", help="model_title, default set to model_title")
 
     args = main_parser.parse_args()
@@ -78,23 +80,10 @@ def train(args):
     cudnn.benchmark = True
 
     print('===> Loading datasets')
-    train_path    = './dataset/trains/'
-    eval_path     = './dataset/evals/'
-    test_data_dir = './dataset/tests/'
-
-
-
-    train_set = HSIDataset(image_dir=train_path, augment=False)
-    eval_set = HSIDataset(image_dir=eval_path, augment=False)
-    test_set = HSIDataset(test_data_dir)
+    train_set, eval_set, colors = get_dataset(args)
     train_loader = DataLoader(train_set, batch_size=args.batch_size, num_workers=8, shuffle=True)
     eval_loader = DataLoader(eval_set, batch_size=args.batch_size, num_workers=4, shuffle=False)
-    test_loader = DataLoader(test_set, batch_size=1, shuffle=False)
-
-    if args.dataset_name=='Chikusei':
-        colors = 59
-    else:
-        colors = 31    
+    test_loader = DataLoader(eval_set, batch_size=1, num_workers=4, shuffle=True)
 
     print('===> Building model')
     net = UnmixingAE(n_blocks=args.n_blocks, res_scale = 0.1, input_channels = colors, conv=default_conv)
@@ -124,7 +113,7 @@ def train(args):
     # add L2 regularization
     optimizer = Adam(net.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
     epoch_meter = meter.AverageValueMeter()
-    log_dir  = 'experiments/unmixing/'+args.dataset_name + "_"+args.model_title+'_'+str(utils.get_timestamp())
+    log_dir  = 'logs/unmixbeforefusion/unmix/'+args.model_title + "_"+args.dataset_name+'_'+str(utils.get_timestamp())
     writer = SummaryWriter(log_dir)
     
     print('===> Start training')
@@ -132,10 +121,15 @@ def train(args):
         adjust_learning_rate(args.learning_rate, optimizer, e+1)
         epoch_meter.reset()
         print("Start epoch {}, learning rate = {}".format(e + 1, optimizer.param_groups[0]["lr"]))
-        for iteration, (gt) in enumerate(train_loader):
+        for iteration, data in enumerate(train_loader):
+            gt=data['image']
+            gt_rgb = data['rgb_image']
             gt = gt.to(device)
+            gt_rgb = gt_rgb.to(device)
+            gt = gt.transpose(-1,-2).transpose(-2, -3)  # (b h w c) -> (b c h w)
+            gt_rgb = gt_rgb.transpose(-1,-2).transpose(-2, -3)  # (b h w c) -> (b c h w)
             optimizer.zero_grad()       
-            _, y, decoder_weight = net(gt)
+            _, y, decoder_weight = net(gt_rgb)
 
             charb_loss = charbloss(y,gt)
             sad_loss = 0.1 * SADLoss(y,gt)
@@ -166,33 +160,68 @@ def train(args):
             save_checkpoint(args, net, e+1, model_t)
 
     ## Save the testing results
-    print('===> Start testing')
-    net.eval().cuda()
-    with torch.no_grad():
-        output = []
-        test_number = 0
-        for i, (gt) in enumerate(test_loader):
-            gt = gt.to(device)
-            _, y, decoder_weight = net(gt)
-            y, gt = y.squeeze().cpu().numpy().transpose(1, 2, 0), gt.squeeze().cpu().numpy().transpose(1, 2, 0)
-            y = y[:gt.shape[0],:gt.shape[1],:] 
-            if i==0:
-                indices = quality_assessment(gt, y, data_range=1., ratio=4)
-            else:
-                indices = sum_dict(indices, quality_assessment(gt, y, data_range=1., ratio=4))
-            output.append(y)
-            test_number += 1
-        for index in indices:
-            indices[index] = indices[index] / test_number
+    # print('===> Start testing')
+    # net.eval().cuda()
+    # with torch.no_grad():
+    #     output = []
+    #     test_number = 0
+    #     for i, data in enumerate(test_loader):
+    #         gt = data['image']
+    #         gt = gt.to(device)
+    #         gt = gt.transpose(-1,-2).transpose(-2, -3)  # (b h w c) -> (b c h w)
+    #         _, y, decoder_weight = net(gt)
+    #         y, gt = y.squeeze().cpu().numpy().transpose(1, 2, 0), gt.squeeze().cpu().numpy().transpose(1, 2, 0)
+    #         y = y[:gt.shape[0],:gt.shape[1],:] 
+    #         if i==0:
+    #             indices = quality_assessment(gt, y, data_range=1., ratio=4)
+    #         else:
+    #             indices = sum_dict(indices, quality_assessment(gt, y, data_range=1., ratio=4))
+    #         output.append(y)
+    #         test_number += 1
+    #     for index in indices:
+    #         indices[index] = indices[index] / test_number
 
-    save_dir = os.path.join(log_dir , args.model_title + "_" + args.dataset_name + '_test.npy')
-    np.save(save_dir, output)
-    print("Test finished, test results saved to .npy file at ", save_dir)
-    print(indices)
+    # save_dir = os.path.join(log_dir , args.model_title + "_" + args.dataset_name + '_test.npy')
+    # np.save(save_dir, output)
+    # print("Test finished, test results saved to .npy file at ", save_dir)
+    # print(indices)
 
-    QIstr =os.path.join(log_dir , args.model_title + "_" + args.dataset_name +"_log.txt")
-    json.dump(indices, open(QIstr, 'w'))
+    # QIstr =os.path.join(log_dir , args.model_title + "_" + args.dataset_name +"_log.txt")
+    # json.dump(indices, open(QIstr, 'w'))
 
+def get_dataset(args):
+    if args.dataset_name=="Indian_Pines_Corrected":
+        train_set = Indian_Pines_Corrected_train(image_size=args.image_size)
+        eval_set = Indian_Pines_Corrected_valid(image_size=args.image_size)
+    elif args.dataset_name=="KSC_Corrected":
+        train_set = KSC_Corrected_train(image_size=args.image_size)
+        eval_set = KSC_Corrected_valid(image_size=args.image_size)
+    elif args.dataset_name=="Pavia":
+        train_set = Pavia_train(image_size=args.image_size)
+        eval_set = Pavia_valid(image_size=args.image_size)
+    elif args.dataset_name=="PaviaU":
+        train_set = PaviaU_train(image_size=args.image_size)
+        eval_set = PaviaU_valid(image_size=args.image_size)
+    elif args.dataset_name=="Salinas_Corrected":
+        train_set = Salinas_Corrected_train(image_size=args.image_size)
+        eval_set = Salinas_Corrected_valid(image_size=args.image_size)
+    else:
+        raise ValueError("dataset_name not supported")
+
+    if args.dataset_name=='Indian_Pines_Corrected':
+        colors = 200
+    elif args.dataset_name=='KSC_Corrected':
+        colors = 176
+    elif args.dataset_name=='Pavia':
+        colors = 102
+    elif args.dataset_name=='PaviaU':
+        colors = 103
+    elif args.dataset_name=='Salinas_Corrected':
+        colors = 204
+    else:
+        raise ValueError("dataset_name not supported")
+    
+    return train_set, eval_set, colors
 
 def sum_dict(a, b):
     temp = dict()
@@ -214,9 +243,14 @@ def validate(args, loader, model, criterion):
     epoch_meter = meter.AverageValueMeter()
     epoch_meter.reset()
     with torch.no_grad():
-        for _, (gt) in enumerate(loader):
-            gt = gt.to(device)          
-            _, y, _ = model(gt)
+        for _, data in enumerate(loader):
+            gt = data['image']
+            gt_rgb = data['rgb_image']
+            gt = gt.to(device)   
+            gt_rgb = gt_rgb.to(device)
+            gt = gt.transpose(-1,-2).transpose(-2, -3)  # (b h w c) -> (b c h w)
+            gt_rgb = gt_rgb.transpose(-1,-2).transpose(-2, -3)  # (b h w c) -> (b c h w)
+            _, y, _ = model(gt_rgb)
             loss = criterion(y, gt)
             epoch_meter.add(loss.item())
         mesg = "===> {}\tEpoch evaluation Complete: Avg. Loss: {:.6f}".format(time.ctime(), epoch_meter.value()[0])
@@ -226,15 +260,14 @@ def validate(args, loader, model, criterion):
     return epoch_meter.value()[0]
 
 def infer(args):
-    inferdata_path  = './dataset/train/'
-    result_path   = './dataset/inferred_abu/'
+    result_path=os.path.join(args.save_dir, "inferred_abu/", f"{args.image_size}", args.model_title + "_" + args.dataset_name + '/')
     if not os.path.exists(result_path):
         os.makedirs(result_path)
 
-    inferdata_set = HSIDataset(image_dir=inferdata_path, augment=False)
-    inferdata_loader = DataLoader(inferdata_set, batch_size=1, num_workers=4, shuffle=False)
+    train_set, eval_set, colors = get_dataset(args)
+    inferdata_loader = DataLoader(train_set, batch_size=1, num_workers=4, shuffle=True)
 
-    model_name = os.path.join(args.ckpt_dir, args.model_title + "_" + args.dataset_name  +'_latest.pth')
+    model_name = os.path.join(args.save_dir, args.model_title + "_" + args.dataset_name  +'_latest.pth')
     print(model_name)
     ckpt = torch.load(model_name)["model"]
     net = UnmixingAE(n_blocks=args.n_blocks, res_scale = 0.1, input_channels=colors,  conv=default_conv)
@@ -245,9 +278,14 @@ def infer(args):
     print('===> Start inferring')
     with torch.no_grad():
         # loading model
-        for i, (gt) in enumerate(inferdata_loader):
+        for i, data in enumerate(inferdata_loader):
+            gt = data['image']
+            gt_rgb = data['rgb_image']
             gt =  gt.to(device)
-            en_result, y, _ = net(gt)
+            gt_rgb = gt_rgb.to(device)
+            gt = gt.transpose(-1,-2).transpose(-2, -3)  # (b h w c) -> (b c h w)
+            gt_rgb = gt_rgb.transpose(-1,-2).transpose(-2, -3)  # (b h w c) -> (b c h w)
+            en_result, y, _ = net(gt_rgb)
             en_result = en_result.clamp_(*(0,1)).squeeze().cpu().numpy().transpose(1, 2, 0)
             gt = gt.clamp_(*(0,1)).squeeze().cpu().numpy().transpose(1, 2, 0)
             y = y.clamp_(*(0,1)).squeeze().cpu().numpy().transpose(1, 2, 0)
@@ -257,6 +295,8 @@ def infer(args):
 
             if i % 100 == 0:
                 print(i)
+            if i >= args.max_num:
+                break
 
 def save_checkpoint(args, model, epoch, ckpt_model_filename):
     device = torch.device("cuda" if args.cuda else "cpu")

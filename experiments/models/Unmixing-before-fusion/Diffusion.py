@@ -49,9 +49,10 @@ if __name__ == "__main__":
     else:
         wandb_logger = None
 
-    train_path    = './dataset/inferred_abu/'
+    # train_path    = './dataset/inferred_abu/'
+    train_path=os.path.join(opt["save_dir"], "inferred_abu/", str(opt["model"]["diffusion"]["image_size"]), opt["AE_name"] + "_" + opt["name"] + '/')
     train_set = AbuDataset(image_dir=train_path, augment=False)
-    train_loader = DataLoader(train_set, batch_size=8, num_workers=4, shuffle=True)
+    train_loader = DataLoader(train_set, batch_size=64, num_workers=8, shuffle=True)
     
     logger.info('Initial Dataset Finished')
 
@@ -95,7 +96,7 @@ if __name__ == "__main__":
                         wandb_logger.log_metrics(logs)
 
                 # validation
-                if current_step % 25000 == 0:
+                if current_step % 5000 == 0:
 
                     result_path = '{}/{}'.format(opt['path']
                                                  ['results'], current_epoch)
@@ -135,7 +136,7 @@ if __name__ == "__main__":
                         opt['model']['beta_schedule']['train'], schedule_phase='train')
 
                 # if current_step % opt['train']['save_checkpoint_freq'] == 0:
-                if current_step % 25000 == 0:
+                if current_step % 5000 == 0:
                     logger.info('Saving models and training states.')
                     diffusion.save_network(current_epoch, current_step)
 
